@@ -5,6 +5,6 @@ const router = require("express").Router();
 router
   .post("/register", Controller.register)
   .post("/login", Controller.login)
-  .put("/:id", Controller.editProduct);
+  .put("/:id", Controller.editBalance);
 
 module.exports = router;
