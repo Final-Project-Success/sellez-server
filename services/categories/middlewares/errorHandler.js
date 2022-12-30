@@ -24,6 +24,9 @@ function errorHandler(err, req, res, next) {
       status = 403;
       msg = "You have no access";
       break;
+    case "Id not found":
+      status = 400;
+      msg = "Id Not Found";
   }
 
   res.status(status).json({ msg });
