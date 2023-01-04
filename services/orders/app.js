@@ -12,7 +12,7 @@ const router = require("./routes");
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use("/orders", router);
+app.use(router);
 app.use(errorHandler);
 
 app.listen(port, () => {
