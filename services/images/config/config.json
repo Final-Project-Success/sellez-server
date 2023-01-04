@@ -2,14 +2,14 @@
   "development": {
     "username": "postgres",
     "password": "postgres",
-    "database": "sellez_ordersDB",
+    "database": "sellez_imagesDB",
     "host": "localhost",
     "dialect": "postgres"
   },
   "test": {
     "username": "postgres",
     "password": "postgres",
-    "database": "sellez_ordersDB_test",
+    "database": "sellez_imagesDB_test",
     "host": "localhost",
     "dialect": "postgres",
     "logging": false
