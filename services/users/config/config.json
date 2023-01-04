@@ -3,14 +3,14 @@
     "username": "postgres",
     "password": "postgres",
     "database": "sellez_usersDB",
-    "host": "127.0.0.1",
+    "host": "localhost",
     "dialect": "postgres"
   },
   "test": {
     "username": "postgres",
     "password": "postgres",
     "database": "sellez_usersDB_test",
-    "host": "127.0.0.1",
+    "host": "localhost",
     "dialect": "postgres",
     "logging": false
   },
