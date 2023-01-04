@@ -31,6 +31,11 @@ module.exports = {
       },
       CategoryId: {
         type: Sequelize.INTEGER,
+        allowNull: false,
+      },
+      color: {
+        type: Sequelize.STRING,
+        allowNull: false,
       },
       createdAt: {
         allowNull: false,

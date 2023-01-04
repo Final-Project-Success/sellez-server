@@ -35,10 +35,6 @@ module.exports = (sequelize, DataTypes) => {
           notEmpty: {
             msg: "Price is required",
           },
-          min: {
-            args: 5000,
-            msg: "Price min is Rp 5000",
-          },
         },
       },
       description: {
@@ -81,7 +77,30 @@ module.exports = (sequelize, DataTypes) => {
           },
         },
       },
-      CategoryId: DataTypes.INTEGER,
+      CategoryId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        validate: {
+          notNull: {
+            msg: "Category id is required",
+          },
+          notEmpty: {
+            msg: "Category id is required",
+          },
+        },
+      },
+      color: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notNull: {
+            msg: "Color is required",
+          },
+          notEmpty: {
+            msg: "Color is required",
+          },
+        },
+      },
     },
     {
       sequelize,

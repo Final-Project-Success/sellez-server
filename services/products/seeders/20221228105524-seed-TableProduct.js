@@ -24,6 +24,7 @@ module.exports = {
             "https://cdn.shopify.com/s/files/1/0516/0760/1336/products/Voila_1_f179f0c5-9c5e-43a6-9fe6-b5a252f55f5b_1000x.jpg?v=1642647113",
           stock: 20,
           CategoryId: 1,
+          color: "red",
         },
         {
           name: "Air Jordan 1 Royal Blue",
@@ -34,6 +35,7 @@ module.exports = {
             "http://cdn.shopify.com/s/files/1/0516/0760/1336/products/3product-555088-404-Xms-2022-03-08T0958490700_1200x1200.jpg?v=1646708344",
           stock: 10,
           CategoryId: 1,
+          color: "red",
         },
       ],
       {}
