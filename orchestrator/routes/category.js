@@ -6,7 +6,7 @@ router
   .post("/", Controller.addCategory)
   .get("/", Controller.readAllCategories)
   .get("/:id", Controller.readDetailCategory)
-  .put("/:id", Controller.editCategory)
+  .patch("/:id", Controller.editCategory)
   .delete("/:id", Controller.deleteCategory);
 
 module.exports = router;

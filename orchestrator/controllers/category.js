@@ -12,7 +12,7 @@ class Controller {
 
       res.status(201).json(data);
     } catch (err) {
-      res.status(err.response.status).json({ msg: err.response.data.msg });
+      res.status(err.response.status).json(err.response.data);
     }
   }
   static async readAllCategories(req, res, next) {
@@ -26,7 +26,7 @@ class Controller {
 
       res.status(200).json(data);
     } catch (err) {
-      res.status(err.response.status).json({ msg: err.response.data.msg });
+      res.status(err.response.status).json(err.response.data);
     }
   }
   static async readDetailCategory(req, res, next) {
@@ -38,13 +38,13 @@ class Controller {
 
       res.status(200).json(data);
     } catch (err) {
-      res.status(err.response.status).json({ msg: err.response.data.msg });
+      res.status(err.response.status).json(err.response.data);
     }
   }
   static async editCategory(req, res, next) {
     try {
       const { id } = req.params;
-      const { data } = await axios.put(
+      const { data } = await axios.patch(
         `${process.env.BASE_URL_CATEGORY}/${id}`,
         { ...req.body }
       );
@@ -53,20 +53,20 @@ class Controller {
 
       res.status(200).json(data);
     } catch (err) {
-      res.status(err.response.status).json({ msg: err.response.data.msg });
+      res.status(err.response.status).json(err.response.data);
     }
   }
   static async deleteCategory(req, res, next) {
     try {
       const { id } = req.params;
-      const { data } = await axios.get(
+      const { data } = await axios.delete(
         `${process.env.BASE_URL_CATEGORY}/${id}`
       );
       await redis.del("categories");
 
       res.status(200).json(data);
     } catch (err) {
-      res.status(err.response.status).json({ msg: err.response.data.msg });
+      res.status(err.response.status).json(err.response.data);
     }
   }
 }

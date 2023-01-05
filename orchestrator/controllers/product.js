@@ -8,11 +8,16 @@ class Controller {
       const { data } = await axios.post(process.env.BASE_URL_PRODUCT, {
         ...req.body,
       });
+
+      await axios.post(process.env.BASE_URL_IMAGE, {
+        ...req.body,
+      });
+
       await redis.del("products");
 
       res.status(201).json(data);
     } catch (err) {
-      res.status(err.response.status).json({ msg: err.response.data.msg });
+      res.status(err.response.status).json(err.response.data);
     }
   }
   static async readAllProducts(req, res, next) {
@@ -26,7 +31,7 @@ class Controller {
 
       res.status(200).json(data);
     } catch (err) {
-      res.status(err.response.status).json({ msg: err.response.data.msg });
+      res.status(err.response.status).json(err.response.data);
     }
   }
   static async readDetailProduct(req, res, next) {
@@ -36,7 +41,7 @@ class Controller {
 
       res.status(200).json(data);
     } catch (err) {
-      res.status(err.response.status).json({ msg: err.response.data.msg });
+      res.status(err.response.status).json(err.response.data);
     }
   }
   static async editProduct(req, res, next) {
@@ -51,18 +56,20 @@ class Controller {
 
       res.status(200).json(data);
     } catch (err) {
-      res.status(err.response.status).json({ msg: err.response.data.msg });
+      res.status(err.response.status).json(err.response.data);
     }
   }
   static async deleteProduct(req, res, next) {
     try {
       const { id } = req.params;
-      const { data } = await axios.get(`${process.env.BASE_URL_PRODUCT}/${id}`);
+      const { data } = await axios.delete(
+        `${process.env.BASE_URL_PRODUCT}/${id}`
+      );
       await redis.del("products");
 
       res.status(200).json(data);
     } catch (err) {
-      res.status(err.response.status).json({ msg: err.response.data.msg });
+      res.status(err.response.status).json(err.response.data);
     }
   }
 }

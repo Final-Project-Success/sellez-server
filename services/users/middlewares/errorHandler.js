@@ -21,9 +21,9 @@ function errorHandler(err, req, res, next) {
       msg = "Error invalid email or password";
       break;
 
-    case "Forbidden":
-      status = 403;
-      msg = "You have no access";
+    case "User Not Found":
+      status = 404;
+      msg = "User Not Found";
       break;
   }
 
