@@ -1,6 +1,7 @@
 function errorHandler(err, req, res, next) {
-  let status = err.status || 500;
-  let msg = err.msg || "Internal Server Error";
+  console.log(err);
+  let status = 500;
+  let msg = "Internal Server Error";
 
   switch (err.name) {
     case "SequelizeUniqueConstraintError":
