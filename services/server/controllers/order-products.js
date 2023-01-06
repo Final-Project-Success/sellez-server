@@ -1,4 +1,4 @@
-const { OrderProduct } = require("../models");
+const { OrderProduct, Product } = require("../models");
 
 class Controller {
   static async postOrderProduct(req, res, next) {
@@ -39,6 +39,37 @@ class Controller {
       res.status(200).json(orderProductsByProduct);
     } catch (err) {
       next(err);
+    }
+  }
+  static async editOrderproduct(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { quantity } = req.body;
+      const orderProductsByProduct = await OrderProduct.findByPk(id);
+
+      if (!orderProductsByProduct) {
+        throw {
+          name: "OrderProduct Not Found",
+        };
+      }
+
+      const product = await Product.findByPk(orderProductsByProduct.ProductId);
+
+      await OrderProduct.update(
+        {
+          quantity,
+          subTotal: product.price * quantity,
+        },
+        {
+          where: {
+            id,
+          },
+        }
+      );
+
+      res.status(200).json(`Order product has been updated`);
+    } catch (err) {
+      next;
     }
   }
   static async deleteOrderProduct(req, res, next) {

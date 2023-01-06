@@ -49,8 +49,8 @@ class Controller {
           { imgUrl: imgUrl4, ProductId: product.id },
         ];
         const newImages = await Image.bulkCreate(data, { transaction: t });
+        const newData = { ...product, Images: newImages };
 
-        const newData = { ...product, images: newImages };
         return newData;
       });
 
@@ -62,7 +62,7 @@ class Controller {
   static async getDetailProduct(req, res, next) {
     try {
       const { id } = req.params;
-      const productById = await Product.findByPk(id);
+      const productById = await Product.findByPk(id, { include: Image });
 
       if (!productById) {
         throw {
