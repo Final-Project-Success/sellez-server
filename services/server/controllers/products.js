@@ -1,9 +1,12 @@
-const { Product, Image, sequelize } = require("../models/index");
+const { Product, Image, Category, sequelize } = require("../models/index");
 
 class Controller {
   static async getProduct(req, res, next) {
     try {
-      const dataProduct = await Product.findAll();
+      const dataProduct = await Product.findAll({
+        include: Category,
+      });
+
       res.status(200).json(dataProduct);
     } catch (err) {
       next(err);
@@ -62,7 +65,9 @@ class Controller {
   static async getDetailProduct(req, res, next) {
     try {
       const { id } = req.params;
-      const productById = await Product.findByPk(id, { include: Image });
+      const productById = await Product.findByPk(id, {
+        include: [{ model: Image }, { model: Category }],
+      });
 
       if (!productById) {
         throw {
