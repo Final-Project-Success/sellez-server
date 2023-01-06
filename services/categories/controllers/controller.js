@@ -60,7 +60,7 @@ class Controller {
       );
 
       res.status(200).json({
-        message: `Category has been updated`,
+        msg: `Category has been updated`,
       });
     } catch (err) {
       next(err);
@@ -84,7 +84,7 @@ class Controller {
       });
 
       res.status(200).json({
-        message: `Category with name ${categoryById.name} has been deleted`,
+        msg: `Category with name ${categoryById.name} has been deleted`,
       });
     } catch (err) {
       next(err);
