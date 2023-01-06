@@ -1,4 +1,4 @@
-const { Product } = require("../models/index");
+const { Product, Image, sequelize } = require("../models/index");
 
 class Controller {
   static async getProduct(req, res, next) {
@@ -11,9 +11,7 @@ class Controller {
   }
   static async postProduct(req, res, next) {
     try {
-      const { name, price, description, imgUrl, stock, CategoryId, color } =
-        req.body;
-      const product = await Product.create({
+      const {
         name,
         price,
         description,
@@ -21,9 +19,42 @@ class Controller {
         stock,
         CategoryId,
         color,
+        imgUrl1,
+        imgUrl2,
+        imgUrl3,
+        imgUrl4,
+      } = req.body;
+
+      if (!imgUrl1 || !imgUrl2 || !imgUrl3 || !imgUrl4) {
+        throw { name: "Image url is required" };
+      }
+
+      const result = await sequelize.transaction(async (t) => {
+        const product = await Product.create(
+          {
+            name,
+            price,
+            description,
+            imgUrl,
+            stock,
+            CategoryId,
+            color,
+          },
+          { transaction: t }
+        );
+        const data = [
+          { imgUrl: imgUrl1, ProductId: product.id },
+          { imgUrl: imgUrl2, ProductId: product.id },
+          { imgUrl: imgUrl3, ProductId: product.id },
+          { imgUrl: imgUrl4, ProductId: product.id },
+        ];
+        const newImages = await Image.bulkCreate(data, { transaction: t });
+
+        const newData = { ...product, images: newImages };
+        return newData;
       });
 
-      res.status(201).json(product);
+      res.status(201).json(result);
     } catch (err) {
       next(err);
     }
