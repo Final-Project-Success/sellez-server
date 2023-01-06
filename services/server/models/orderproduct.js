@@ -61,6 +61,18 @@ module.exports = (sequelize, DataTypes) => {
           },
         },
       },
+      price: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        validate: {
+          notNull: {
+            msg: "Price is required",
+          },
+          notEmpty: {
+            msg: "Price is required",
+          },
+        },
+      },
     },
     {
       sequelize,
