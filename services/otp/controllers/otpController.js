@@ -3,8 +3,8 @@ const nodemailer = require("nodemailer");
 class OtpController {
   static async createOTP() {
     try {
-      let em = "gitasellez@gmail.com";
-      let pa = "sellezpassword";
+      let em = "gitasellez@gmail.com"; //masukin ke dotenv
+      let pa = "sellezpassword"; //masukin ke dotenv
       let pwApp = "gdursqiwutbdcbyt";
 
       let otp = otpGenerator.generate(10, {});
@@ -12,7 +12,7 @@ class OtpController {
       const transporter = nodemailer.createTransport({
         host: "smtp.gmail.com",
         port: 465,
-        secure: true, // use SSL
+        secure: true,
         auth: {
           user: em,
           pass: pwApp,
@@ -21,11 +21,11 @@ class OtpController {
 
       var mailOptions = {
         from: em,
-        to: "alfianwilfredohoris@gmail.com",
+        to: "alfianwilfredohoris@gmail.com", //nanti ini diganti jadi email usernya
         subject: "Activation code",
-        html: `<h1>Welcome </h1>
-          <p>You</p>
-          <img src="cid:Nyan">`,
+        html: `
+          <p>Your Activation code is : ${otp}</p>
+          `,
         attachments: [
           //   {
           //     filename: "nyan cat dilelang.jpg",
@@ -43,7 +43,7 @@ class OtpController {
         }
       });
     } catch (error) {
-      console.log(error);
+      res.status(500).json({ message: "Internal Server Error" });
     }
   }
 }
