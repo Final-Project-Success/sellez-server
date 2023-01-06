@@ -18,10 +18,13 @@ class Controller {
   static async readAllCategories(req, res, next) {
     try {
       const chaceData = await redis.get("categories");
+
       if (chaceData) {
         return res.status(200).json(JSON.parse(chaceData));
       }
+
       const { data } = await axios.get(process.env.BASE_URL_CATEGORY);
+
       await redis.set("categories", JSON.stringify(data));
 
       res.status(200).json(data);
