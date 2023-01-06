@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "jest --runInBand --forceExit --setTimeout=500 --verbose",
+    "db:test": "sequelize --env=test db:migrate:undo:all && sequelize --env=test db:migrate && sequelize --env=test db:seed:all",
     "start": "node app.js",
     "dev": "nodemon app.js"
   },
