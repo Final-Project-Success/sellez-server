@@ -10,7 +10,7 @@ router
   .use("/", userRouter)
   .use("/products", productRouter)
   .use("/categories", categoryRouter)
-  // .use(authentication)
+  .use(authentication)
   .use("/order-products", orderProductRouter)
   .use("/orders", orderRouter);
 

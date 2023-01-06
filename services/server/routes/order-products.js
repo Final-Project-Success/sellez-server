@@ -3,10 +3,7 @@ const Controller = require("../controllers/order-products");
 const router = require("express").Router();
 
 router
-  .post("/", Controller.postOrderProduct)
   .get("/", Controller.getOrderProduct)
-  .get("/:id", Controller.getDetailOrderProduct)
-  .put("/:id", Controller.getDetailOrderProduct)
-  .delete("/:id", Controller.deleteOrderProduct);
+  .get("/:id", Controller.getDetailOrderProduct);
 
 module.exports = router;

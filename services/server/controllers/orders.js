@@ -18,16 +18,19 @@ class Controller {
           { transaction: t }
         );
 
-        await OrderProduct.bulkCreate(
+        const data = [
           {
             ProductId,
-            OrderId: newOrder.id,
             quantity,
-            subTotal: price * quantity,
             price,
           },
-          { transaction: t }
-        );
+        ];
+
+        const newData = data.map((el) => {
+          return { ...data, subTotal: price * quantity, OrderId: newOrder.id };
+        });
+
+        await OrderProduct.bulkCreate(data, { transaction: t });
 
         return newOrder;
       });
