@@ -9,7 +9,7 @@ class Controller {
         ...req.body,
       });
 
-      await axios.post(process.env.BASE_URL_IMAGE, {
+      await axios.post(`${process.env.BASE_URL_IMAGE}/${data.id}`, {
         ...req.body,
       });
 
@@ -23,10 +23,13 @@ class Controller {
   static async readAllProducts(req, res, next) {
     try {
       const chaceData = await redis.get("products");
+
       if (chaceData) {
         return res.status(200).json(JSON.parse(chaceData));
       }
+
       const { data } = await axios.get(process.env.BASE_URL_PRODUCT);
+
       await redis.set("products", JSON.stringify(data));
 
       res.status(200).json(data);
@@ -38,8 +41,13 @@ class Controller {
     try {
       const { id } = req.params;
       const { data } = await axios.get(`${process.env.BASE_URL_PRODUCT}/${id}`);
+      const { data: images } = await axios.get(
+        `${process.env.BASE_URL_IMAGE}/${id}`
+      );
 
-      res.status(200).json(data);
+      const newData = { ...data, images };
+
+      res.status(200).json(newData);
     } catch (err) {
       res.status(err.response.status).json(err.response.data);
     }

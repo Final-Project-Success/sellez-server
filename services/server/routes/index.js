@@ -1,8 +1,8 @@
 const router = require("express").Router();
-const categoryRouter = require("./category");
-const orderRouter = require("./order");
-const productRouter = require("./product");
-const userRouter = require("./user");
+const categoryRouter = require("./categories");
+const orderRouter = require("./orders");
+const productRouter = require("./products");
+const userRouter = require("./users");
 const orderProductRouter = require("./order-products");
 
 router
