@@ -2,8 +2,8 @@ function errorHandler(err, req, res, next) {
   let status = 500;
   let msg = "Internal Server Error";
 
+  console.log(err);
   switch (err.name) {
-    case "SequelizeUniqueConstraintError":
     case "SequelizeValidationError":
       status = 400;
       msg = err.errors.map((el) => el.message)[0];

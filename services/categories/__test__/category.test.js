@@ -1,6 +1,6 @@
 const app = require("../app");
 const request = require("supertest");
-const { sequelize } = require("../models");
+const { sequelize, Category } = require("../models");
 const { queryInterface } = sequelize;
 
 beforeAll(() => {
@@ -30,6 +30,15 @@ describe("test table Categories", () => {
     response.body.forEach((el) => {
       expect(el).toHaveProperty("name", expect.any(String));
     });
+  });
+  test("testing table read Categorues if error", async () => {
+    jest
+      .spyOn(Category, "findAll")
+      .mockImplementationOnce(() =>
+        Promise.reject({ name: "something wrong" })
+      );
+    const response = await request(app).get("/");
+    expect(response.status).toBe(500);
   });
   test("testing read Categories by Id", async () => {
     const response = await request(app).get("/1");
