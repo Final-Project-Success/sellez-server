@@ -4,7 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "jest --runInBand --forceExit --setTimeout=500 --verbose",
+    "test": "jest --runInBand --forceExit --setTimeout=500 --verbose --coverage",
     "db:test": "sequelize --env=test db:create && sequelize --env=test db:migrate:undo:all && sequelize --env=test db:migrate && sequelize --env=test db:seed:all",
     "start": "node app.js",
     "dev": "nodemon app.js",
