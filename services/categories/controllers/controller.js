@@ -60,7 +60,7 @@ class Controller {
       );
 
       res.status(200).json({
-        message: `Category with name ${categoryById.name} has been updated`,
+        message: `Category has been updated`,
       });
     } catch (err) {
       next(err);

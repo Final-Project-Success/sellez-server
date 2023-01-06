@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "jest --runInBand --forceExit --setTimeout=500 --verbose",
+    "db:test": "sequelize --env=test db:migrate:undo:all && sequelize --env=test db:migrate && sequelize --env=test db:seed:all",
     "start": "node app.js",
     "dev": "nodemon app.js"
   },
@@ -15,7 +16,8 @@
     "axios": "^1.2.1",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
-    "express": "^4.18.2"
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.0"
   },
   "devDependencies": {
     "ioredis": "^5.2.4",

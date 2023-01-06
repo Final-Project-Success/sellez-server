@@ -1,10 +1,8 @@
 const Controller = require("../controllers/user");
+const { authentication } = require("../middlewares/authentication");
 
 const router = require("express").Router();
 
-router
-  .post("/register", Controller.register)
-  .post("/login", Controller.login)
-  .put("/:id", Controller.editProduct);
+router.post("/login", Controller.login).post("/register", Controller.register);
 
 module.exports = router;
