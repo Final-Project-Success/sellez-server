@@ -9,13 +9,10 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
-      name: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
       totalPrice: {
         type: Sequelize.INTEGER,
         allowNull: false,
+        defaultValue: 0,
       },
       UserId: {
         type: Sequelize.INTEGER,
@@ -35,6 +32,7 @@ module.exports = {
       shippingCost: {
         type: Sequelize.INTEGER,
         allowNull: false,
+        defaultValue: 0,
       },
       createdAt: {
         allowNull: false,

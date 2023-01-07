@@ -3,39 +3,16 @@ const { Order, OrderProduct, sequelize } = require("../models");
 class Controller {
   static async addOrders(req, res, next) {
     try {
-      const { name, totalPrice, shippingCost, quantity, ProductId, price } =
-        req.body;
+      const { totalPrice, shippingCost } = req.body;
 
-      const result = await sequelize.transaction(async (t) => {
-        const newOrder = await Order.create(
-          {
-            name,
-            totalPrice,
-            UserId: req.User.id,
-            shippingCost,
-            status: false,
-          },
-          { transaction: t }
-        );
-
-        const data = [
-          {
-            ProductId,
-            quantity,
-            price,
-          },
-        ];
-
-        const newData = data.map((el) => {
-          return { ...data, subTotal: price * quantity, OrderId: newOrder.id };
-        });
-
-        await OrderProduct.bulkCreate(data, { transaction: t });
-
-        return newOrder;
+      const newOrder = await Order.create({
+        totalPrice,
+        UserId: req.User.id,
+        shippingCost,
+        status: false,
       });
 
-      res.status(201).json(result);
+      res.status(201).json(newOrder);
     } catch (err) {
       next(err);
     }
