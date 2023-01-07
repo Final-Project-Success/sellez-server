@@ -182,7 +182,6 @@ describe("test table Products", () => {
     expect(response.status).toBe(400);
     expect(response.body).toHaveProperty("msg", "Name is required");
   });
-
   test("testing create Product if Price is null", async () => {
     const data = {
       ...createProduct,

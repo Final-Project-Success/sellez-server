@@ -15,8 +15,6 @@ class Controller {
   static async postProduct(req, res, next) {
     try {
       const images = req.files;
-      console.log(images);
-
       const { name, price, description, stock, CategoryId, color } = req.body;
       const result = await sequelize.transaction(async (t) => {
         const product = await Product.create(
@@ -44,8 +42,7 @@ class Controller {
 
       res.status(201).json(result);
     } catch (err) {
-      // next(err);
-      console.log(err);
+      next(err);
     }
   }
   static async getDetailProduct(req, res, next) {
