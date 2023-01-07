@@ -24,7 +24,7 @@ const createCategories = {
 
 describe("test table Categories", () => {
   test("testing read Categories if success", async () => {
-    const response = await request(app).get("/");
+    const response = await request(app).get("/categories");
     expect(response.status).toBe(200);
     expect(response.body).toBeInstanceOf(Object);
     response.body.forEach((el) => {
@@ -37,22 +37,24 @@ describe("test table Categories", () => {
       .mockImplementationOnce(() =>
         Promise.reject({ name: "something wrong" })
       );
-    const response = await request(app).get("/");
+    const response = await request(app).get("/categories");
     expect(response.status).toBe(500);
   });
   test("testing read Categories by Id", async () => {
-    const response = await request(app).get("/1");
+    const response = await request(app).get("/categories/1");
     expect(response.status).toBe(200);
     expect(response.body).toBeInstanceOf(Object);
     expect(response.body).toHaveProperty("name", expect.any(String));
   });
   test("testing read Categories if data by id not found", async () => {
-    const response = await request(app).get(`/1000`);
+    const response = await request(app).get(`/categories/1000`);
     expect(response.status).toBe(404);
     expect(response.body).toHaveProperty("msg", "Category Not Found");
   });
   test("testing create Categories if success", async () => {
-    const response = await request(app).post("/").send(createCategories);
+    const response = await request(app)
+      .post("/categories")
+      .send(createCategories);
     expect(response.status).toBe(201);
     expect(response.body).toHaveProperty("id", response.body.id);
     expect(response.body).toHaveProperty("name", createCategories.name);
@@ -61,7 +63,7 @@ describe("test table Categories", () => {
     const noname = {
       name: null,
     };
-    const response = await request(app).post("/").send(noname);
+    const response = await request(app).post("/categories").send(noname);
     expect(response.status).toBe(400);
     expect(response.body).toHaveProperty("msg", "Name is required");
   });
@@ -69,20 +71,20 @@ describe("test table Categories", () => {
     const noname = {
       name: "",
     };
-    const response = await request(app).post("/").send(noname);
+    const response = await request(app).post("/categories").send(noname);
     expect(response.status).toBe(400);
     expect(response.body).toHaveProperty("msg", "Name is required");
   });
   test("testing delete Categories if success", async () => {
-    const response = await request(app).delete("/3");
+    const response = await request(app).delete("/categories/3");
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty(
-      "msg",
+      "message",
       "Category with name Men Shoes has been deleted"
     );
   });
   test("testing delete Categories if data by id not found", async () => {
-    const response = await request(app).delete("/1000");
+    const response = await request(app).delete("/categories/1000");
     expect(response.status).toBe(404);
     expect(response.body).toHaveProperty("msg", "Category Not Found");
   });
@@ -90,15 +92,22 @@ describe("test table Categories", () => {
     const editName = {
       name: "Casual Shoes",
     };
-    const response = await request(app).patch("/1").send(editName.name);
+    const response = await request(app)
+      .patch("/categories/1")
+      .send(editName.name);
     expect(response.status).toBe(200);
-    expect(response.body).toHaveProperty("msg", "Category has been updated");
+    expect(response.body).toHaveProperty(
+      "message",
+      "Category has been updated"
+    );
   });
   test("testing edit Catagories by Id if Id not found", async () => {
     const editName = {
       name: "Casual Shoes",
     };
-    const response = await request(app).patch("/1000").send(editName.name);
+    const response = await request(app)
+      .patch("/categories/1000")
+      .send(editName.name);
     expect(response.status).toBe(404);
     expect(response.body).toHaveProperty("msg", "Category Not Found");
   });
