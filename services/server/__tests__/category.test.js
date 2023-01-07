@@ -31,7 +31,7 @@ describe("test table Categories", () => {
       expect(el).toHaveProperty("name", expect.any(String));
     });
   });
-  test("testing table read Categorues if error", async () => {
+  test("testing table read Categories if error", async () => {
     jest
       .spyOn(Category, "findAll")
       .mockImplementationOnce(() =>

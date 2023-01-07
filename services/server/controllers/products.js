@@ -113,7 +113,7 @@ class Controller {
       );
 
       res.status(200).json({
-        message: `Product with name ${productById.name} has been updated`,
+        msg: `Product with name ${productById.name} has been updated`,
       });
     } catch (err) {
       next(err);
@@ -137,7 +137,7 @@ class Controller {
       });
 
       res.status(200).json({
-        message: `Product with name ${productById.name} has been deleted`,
+        msg: `Product with name ${productById.name} has been deleted`,
       });
     } catch (err) {
       next(err);
