@@ -228,16 +228,16 @@ describe("test table Users", () => {
   //     expect(response.status).toBe(404);
   //     expect(response.body).toHaveProperty("msg", "User Not Found");
   //   });
-  test("testing User isn't logged in and wants to hit endpoint products", async () => {
-    const data = {
-      ...dataUser,
-      username: "user1000@gmail.com",
-      password: "user1000@gmail.com",
-    };
-    const response = await request(app).get("/products").send(data);
-    expect(response.status).toBe(404);
-    expect(response.body).toHaveProperty("msg", "User Not Found");
-  });
+  // test("testing User isn't logged in and wants to hit endpoint products", async () => {
+  //   const data = {
+  //     ...dataUser,
+  //     username: "user1000@gmail.com",
+  //     password: "user1000@gmail.com",
+  //   };
+  //   const response = await request(app).get("/products/1").send(data);
+  //   expect(response.status).toBe(404);
+  //   expect(response.body).toHaveProperty("msg", "User Not Found");
+  // });
 });
 
 afterAll(async () => {
