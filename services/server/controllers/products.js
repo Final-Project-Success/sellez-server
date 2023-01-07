@@ -1,9 +1,12 @@
-const { Product, Image, sequelize } = require("../models/index");
+const { Product, Image, Category, sequelize } = require("../models/index");
 
 class Controller {
   static async getProduct(req, res, next) {
     try {
-      const dataProduct = await Product.findAll();
+      const dataProduct = await Product.findAll({
+        include: Category,
+      });
+
       res.status(200).json(dataProduct);
     } catch (err) {
       next(err);
@@ -49,8 +52,8 @@ class Controller {
           { imgUrl: imgUrl4, ProductId: product.id },
         ];
         const newImages = await Image.bulkCreate(data, { transaction: t });
+        const newData = { ...product, Images: newImages };
 
-        const newData = { ...product, images: newImages };
         return newData;
       });
 
@@ -62,7 +65,9 @@ class Controller {
   static async getDetailProduct(req, res, next) {
     try {
       const { id } = req.params;
-      const productById = await Product.findByPk(id);
+      const productById = await Product.findByPk(id, {
+        include: [{ model: Image }, { model: Category }],
+      });
 
       if (!productById) {
         throw {
