@@ -7,7 +7,7 @@
     "start": "node app.js",
     "dev": "nodemon app.js",
     "test": "jest --runInBand --forceExit --setTimeout=500 --verbose --coverage",
-    "db:test": "sequelize --env=test db:create && sequelize --env=test db:migrate:undo:all && sequelize --env=test db:migrate && sequelize --env=test db:seed:all",
+    "db:test": "sequelize --env=test db:drop && sequelize --env=test db:create && sequelize --env=test db:migrate:undo:all && sequelize --env=test db:migrate && sequelize --env=test db:seed:all",
     "db:create": "sequelize db:drop && sequelize db:create",
     "db:migrate": "sequelize db:migrate:undo:all && sequelize db:migrate && sequelize db:seed:all"
   },
