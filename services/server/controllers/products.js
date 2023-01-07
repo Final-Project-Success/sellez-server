@@ -18,21 +18,6 @@ class Controller {
       console.log(images);
 
       const { name, price, description, stock, CategoryId, color } = req.body;
-
-      // const result = await Product.create({
-      //   name,
-      //   price,
-      //   description,
-      //   imgUrl: images[4].path,
-      //   stock,
-      //   CategoryId,
-      //   color,
-      // });
-
-      // if (!imgUrl1 || !imgUrl2 || !imgUrl3 || !imgUrl4) {
-      //   throw { name: "Image url is required" };
-      // }
-
       const result = await sequelize.transaction(async (t) => {
         const product = await Product.create(
           {
@@ -46,7 +31,6 @@ class Controller {
           },
           { transaction: t }
         );
-
 
         const data = images.map((el) => {
           return { imgUrl: el.path, ProductId: product.id };
