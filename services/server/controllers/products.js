@@ -14,23 +14,24 @@ class Controller {
   }
   static async postProduct(req, res, next) {
     try {
-      const {
-        name,
-        price,
-        description,
-        imgUrl,
-        stock,
-        CategoryId,
-        color,
-        imgUrl1,
-        imgUrl2,
-        imgUrl3,
-        imgUrl4,
-      } = req.body;
+      const images = req.files;
+      console.log(images);
 
-      if (!imgUrl1 || !imgUrl2 || !imgUrl3 || !imgUrl4) {
-        throw { name: "Image url is required" };
-      }
+      const { name, price, description, stock, CategoryId, color } = req.body;
+
+      // const result = await Product.create({
+      //   name,
+      //   price,
+      //   description,
+      //   imgUrl: images[4].path,
+      //   stock,
+      //   CategoryId,
+      //   color,
+      // });
+
+      // if (!imgUrl1 || !imgUrl2 || !imgUrl3 || !imgUrl4) {
+      //   throw { name: "Image url is required" };
+      // }
 
       const result = await sequelize.transaction(async (t) => {
         const product = await Product.create(
@@ -38,19 +39,19 @@ class Controller {
             name,
             price,
             description,
-            imgUrl,
+            imgUrl: images[0].path,
             stock,
             CategoryId,
             color,
           },
           { transaction: t }
         );
-        const data = [
-          { imgUrl: imgUrl1, ProductId: product.id },
-          { imgUrl: imgUrl2, ProductId: product.id },
-          { imgUrl: imgUrl3, ProductId: product.id },
-          { imgUrl: imgUrl4, ProductId: product.id },
-        ];
+
+
+        const data = images.map((el) => {
+          return { imgUrl: el.path, ProductId: product.id };
+        });
+
         const newImages = await Image.bulkCreate(data, { transaction: t });
         const newData = { ...product, Images: newImages };
 
@@ -59,7 +60,8 @@ class Controller {
 
       res.status(201).json(result);
     } catch (err) {
-      next(err);
+      // next(err);
+      console.log(err);
     }
   }
   static async getDetailProduct(req, res, next) {
