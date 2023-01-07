@@ -60,22 +60,6 @@ class Controller {
       next(err);
     }
   }
-  static async findUser(req, res, next) {
-    try {
-      const { id } = req.params;
-      const findUser = await User.findByPk(id);
-
-      if (!findUser) {
-        throw {
-          name: "User Not Found",
-        };
-      }
-
-      res.status(200).json(findUser);
-    } catch (err) {
-      next(err);
-    }
-  }
 }
 
 module.exports = Controller;
