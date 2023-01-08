@@ -21,16 +21,6 @@ function errorHandler(err, req, res, next) {
       msg = "Error invalid email or password";
       break;
 
-    case "Image Not Found":
-      status = 404;
-      msg = "Image Not Found";
-      break;
-
-    case "Image url is required":
-      status = 400;
-      msg = "Image url is required";
-      break;
-
     case "Product id is required":
       status = 400;
       msg = "Product id is required";
@@ -44,11 +34,6 @@ function errorHandler(err, req, res, next) {
     case "OrderProduct Not Found":
       status = 404;
       msg = "OrderProduct Not Found";
-      break;
-
-    case "User Not Found":
-      status = 404;
-      msg = "User Not Found";
       break;
 
     case "Product Not Found":
