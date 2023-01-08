@@ -1,4 +1,4 @@
-const { Order, OrderProduct, sequelize } = require("../models");
+const { Order } = require("../models");
 
 class Controller {
   static async addOrders(req, res, next) {
