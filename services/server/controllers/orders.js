@@ -25,7 +25,7 @@ class Controller {
       const chaceData = await redis.get("sellez-orders");
 
       if (chaceData) {
-        return JSON.parse(chaceData);
+        return res.status(200).json(JSON.parse(chaceData));
       }
 
       const orders = await Order.findAll();
