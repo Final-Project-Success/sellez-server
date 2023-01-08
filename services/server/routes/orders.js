@@ -6,6 +6,6 @@ router
   .post("/", Controller.addOrders)
   .get("/", Controller.readAllOrders)
   .get("/:id", Controller.readOneOrder)
-  .patch("/:id", Controller.updateStatusOrder);
+  .post("/:id", Controller.updateStatusOrder);
 
 module.exports = router;
