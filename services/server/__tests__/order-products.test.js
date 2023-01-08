@@ -97,6 +97,11 @@ describe("test table OrderProducts", () => {
       expect(el).toHaveProperty("price", expect.any(Number));
     });
   });
+  test("testing read OrderProducts if User isn't logged in", async () => {
+    const response = await request(app).get("/order-products");
+    expect(response.status).toBe(401);
+    expect(response.body).toHaveProperty("msg", "Please Login First");
+  });
   test("testing table read OrderProducts if error", async () => {
     jest
       .spyOn(OrderProduct, "findAll")
