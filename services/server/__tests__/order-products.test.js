@@ -6,8 +6,25 @@ const { jwtSign } = require("../helpers/jwt");
 const { queryInterface } = sequelize;
 
 let access_token;
-beforeAll(() => {
+beforeAll(async () => {
   queryInterface.bulkInsert(
+    "Users",
+    [
+      {
+        username: "user1",
+        email: "user1111@gmail.com",
+        password: hashPassword("qwerty"),
+        address: "Hacktiv8",
+        profilePict:
+          "https://www.smartfren.com/app/uploads/2021/11/featured-image-37.png",
+        role: "customer",
+        phoneNumber: "081312391839",
+      },
+    ],
+    {}
+  );
+  access_token = jwtSign({ id: 1 });
+  await queryInterface.bulkInsert(
     "Categories",
     [
       {
@@ -16,7 +33,7 @@ beforeAll(() => {
     ],
     {}
   );
-  queryInterface.bulkInsert(
+  await queryInterface.bulkInsert(
     "Products",
     [
       {
@@ -33,6 +50,14 @@ beforeAll(() => {
     ],
     {}
   );
+  queryInterface.bulkInsert("Orders", [
+    {
+      totalPrice: 100000,
+      UserId: 1,
+      shippingCost: 20000,
+      status: false,
+    },
+  ]);
   queryInterface.bulkInsert(
     "OrderProducts",
     [
@@ -46,39 +71,31 @@ beforeAll(() => {
     ],
     {}
   );
-  queryInterface.bulkInsert(
-    "Users",
-    [
-      {
-        username: "user10",
-        email: "user1111@gmail.com",
-        password: hashPassword("qwerty"),
-        address: "Hacktiv8",
-        profilePict:
-          "https://www.smartfren.com/app/uploads/2021/11/featured-image-37.png",
-        role: "customer",
-        phoneNumber: "081312391839",
-      },
-    ],
-    {}
-  );
-  access_token = jwtSign({ id: 1 });
 });
 
+const createOrderProduct = {
+  ProductId: 1,
+  OrderId: 1,
+  quantity: 5,
+  subTotal: 50000,
+  price: 10000,
+};
+
 describe("test table OrderProducts", () => {
-  test.only("testing read OrderProducts if success", async () => {
+  test("testing read OrderProducts if success", async () => {
     const response = await request(app)
       .get("/order-products")
       .set("access_token", access_token);
+    // console.log(response.status);
     expect(response.status).toBe(200);
-    // expect(response.body).toBeInstanceOf(Object);
-    // response.body.forEach((el) => {
-    //   expect(el).toHaveProperty("ProductId", expect.any(Number));
-    //   expect(el).toHaveProperty("OrderId", expect.any(Number));
-    //   expect(el).toHaveProperty("quantity", expect.any(Number));
-    //   expect(el).toHaveProperty("subTotal", expect.any(Number));
-    //   expect(el).toHaveProperty("price", expect.any(Number));
-    // });
+    expect(response.body).toBeInstanceOf(Object);
+    response.body.forEach((el) => {
+      expect(el).toHaveProperty("ProductId", expect.any(Number));
+      expect(el).toHaveProperty("OrderId", expect.any(Number));
+      expect(el).toHaveProperty("quantity", expect.any(Number));
+      expect(el).toHaveProperty("subTotal", expect.any(Number));
+      expect(el).toHaveProperty("price", expect.any(Number));
+    });
   });
   test("testing table read OrderProducts if error", async () => {
     jest
@@ -86,45 +103,81 @@ describe("test table OrderProducts", () => {
       .mockImplementationOnce(() =>
         Promise.reject({ name: "something wrong" })
       );
-    const response = await request(app).get("/");
+    const response = await request(app)
+      .get("/order-products")
+      .set("access_token", access_token);
     expect(response.status).toBe(500);
   });
   test("testing read OrderProducts by Id", async () => {
-    const response = await request(app).get("/1");
+    const response = await request(app)
+      .get("/order-products/1")
+      .set("access_token", access_token);
     expect(response.status).toBe(200);
     expect(response.body).toBeInstanceOf(Object);
-    expect(response.body).toHaveProperty("ProductId", expect.any(Integer));
-    expect(response.body).toHaveProperty("OrderId", expect.any(Integer));
-    expect(response.body).toHaveProperty("quantity", expect.any(Integer));
-    expect(response.body).toHaveProperty("subTotal", expect.any(Integer));
-    expect(response.body).toHaveProperty("price", expect.any(Integer));
+    expect(response.body).toHaveProperty("ProductId", expect.any(Number));
+    expect(response.body).toHaveProperty("OrderId", expect.any(Number));
+    expect(response.body).toHaveProperty("quantity", expect.any(Number));
+    expect(response.body).toHaveProperty("subTotal", expect.any(Number));
+    expect(response.body).toHaveProperty("price", expect.any(Number));
   });
   test("testing read OrderProducts if data by id not found", async () => {
-    const response = await request(app).get(`/1000`);
+    const response = await request(app)
+      .get("/order-products/1000")
+      .set("access_token", access_token);
     expect(response.status).toBe(404);
     expect(response.body).toHaveProperty("msg", "OrderProduct Not Found");
   });
+  test("testing create OrderProducts if success", async () => {
+    const response = await request(app)
+      .post("/order-products")
+      .send(createOrderProduct)
+      .set("access_token", access_token);
+    expect(response.status).toBe(201);
+    expect(response.body).toBeInstanceOf(Object);
+    expect(response.body).toHaveProperty("ProductId", expect.any(Number));
+    expect(response.body).toHaveProperty("OrderId", expect.any(Number));
+    expect(response.body).toHaveProperty("quantity", expect.any(Number));
+    expect(response.body).toHaveProperty("subTotal", expect.any(Number));
+    expect(response.body).toHaveProperty("price", expect.any(Number));
+  });
+  test("testing create OrderProducts if ProductId is empty", async () => {
+    const data = {
+      ...createOrderProduct,
+      ProductId: "",
+    };
+    const response = await request(app)
+      .post("/order-products")
+      .send(data)
+      .set("access_token", access_token);
+    expect(response.status).toBe(400);
+    expect(response.body).toHaveProperty("msg", "Product id is required");
+  });
 });
 
-// afterAll(async () => {
-//   queryInterface.bulkDelete("Categories", null, {
-//     truncate: true,
-//     restartIdentity: true,
-//     cascade: true,
-//   });
-//   queryInterface.bulkDelete("Products", null, {
-//     truncate: true,
-//     restartIdentity: true,
-//     cascade: true,
-//   });
-//   queryInterface.bulkDelete("OrderProducts", null, {
-//     truncate: true,
-//     restartIdentity: true,
-//     cascade: true,
-//   });
-//   queryInterface.bulkDelete("Users", null, {
-//     truncate: true,
-//     restartIdentity: true,
-//     cascade: true,
-//   });
-// });
+afterAll(async () => {
+  await queryInterface.bulkDelete("Categories", null, {
+    truncate: true,
+    restartIdentity: true,
+    cascade: true,
+  });
+  await queryInterface.bulkDelete("Products", null, {
+    truncate: true,
+    restartIdentity: true,
+    cascade: true,
+  });
+  await queryInterface.bulkDelete("Orders", null, {
+    truncate: true,
+    restartIdentity: true,
+    cascade: true,
+  });
+  await queryInterface.bulkDelete("OrderProducts", null, {
+    truncate: true,
+    restartIdentity: true,
+    cascade: true,
+  });
+  await queryInterface.bulkDelete("Users", null, {
+    truncate: true,
+    restartIdentity: true,
+    cascade: true,
+  });
+});
