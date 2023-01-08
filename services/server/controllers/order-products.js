@@ -12,7 +12,7 @@ class Controller {
         price,
         subTotal: price * quantity,
       });
-
+      
       res.status(201).json(newOrderProduct);
     } catch (err) {
       next(err);
