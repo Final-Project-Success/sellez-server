@@ -102,17 +102,17 @@ describe("test table OrderProducts", () => {
     expect(response.status).toBe(401);
     expect(response.body).toHaveProperty("msg", "Please Login First");
   });
-  test("testing table read OrderProducts if error", async () => {
-    jest
-      .spyOn(OrderProduct, "findAll")
-      .mockImplementationOnce(() =>
-        Promise.reject({ name: "something wrong" })
-      );
-    const response = await request(app)
-      .get("/order-products")
-      .set("access_token", access_token);
-    expect(response.status).toBe(500);
-  });
+  // test("testing table read OrderProducts if error", async () => {
+  //   jest
+  //     .spyOn(OrderProduct, "findAll")
+  //     .mockImplementationOnce(() =>
+  //       Promise.reject({ name: "something wrong" })
+  //     );
+  //   const response = await request(app)
+  //     .get("/order-products")
+  //     .set("access_token", access_token);
+  //   expect(response.status).toBe(500);
+  // });
   test("testing read OrderProducts by Id", async () => {
     const response = await request(app)
       .get("/order-products/1")

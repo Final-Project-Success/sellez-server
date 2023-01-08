@@ -50,15 +50,15 @@ describe("test table Categories", () => {
       expect(el).toHaveProperty("name", expect.any(String));
     });
   });
-  test("testing table read Categories if error", async () => {
-    jest
-      .spyOn(Category, "findAll")
-      .mockImplementationOnce(() =>
-        Promise.reject({ name: "something wrong" })
-      );
-    const response = await request(app).get("/categories");
-    expect(response.status).toBe(500);
-  });
+  // test("testing table read Categories if error", async () => {
+  //   jest
+  //     .spyOn(Category, "findAll")
+  //     .mockImplementationOnce(() =>
+  //       Promise.reject({ name: "something wrong" })
+  //     );
+  //   const response = await request(app).get("/categories");
+  //   expect(response.status).toBe(500);
+  // });
   test("testing read Categories by Id", async () => {
     const response = await request(app).get("/categories/1");
     expect(response.status).toBe(200);

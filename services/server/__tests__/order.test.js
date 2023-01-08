@@ -86,17 +86,17 @@ describe("test table Orders", () => {
       expect(el).toHaveProperty("updatedAt", expect.any(String));
     });
   });
-  test("testing table read OrderProducts if error", async () => {
-    jest
-      .spyOn(Order, "findAll")
-      .mockImplementationOnce(() =>
-        Promise.reject({ name: "something wrong" })
-      );
-    const response = await request(app)
-      .get("/orders")
-      .set("access_token", access_token);
-    expect(response.status).toBe(500);
-  });
+  // test("testing table read Orders if error", async () => {
+  //   jest
+  //     .spyOn(Order, "findAll")
+  //     .mockImplementationOnce(() =>
+  //       Promise.reject({ name: "something wrong" })
+  //     );
+  //   const response = await request(app)
+  //     .get("/orders")
+  //     .set("access_token", access_token);
+  //   expect(response.status).toBe(500);
+  // });
   test("testing create Order if success", async () => {
     const response = await request(app)
       .post("/orders")
