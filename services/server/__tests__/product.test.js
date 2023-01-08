@@ -444,13 +444,18 @@ describe("test table Products", () => {
   //     "Product with name Air Jordan 1 Royal Blue has been deleted"
   //   );
   // });
-  // test("testing delete Product if data by id not found", async () => {
-  //   const response = await request(app)
-  //     .delete("/products/1000")
-  //     .set("access_token", access_token);
-  //   expect(response.status).toBe(404);
-  //   expect(response.body).toHaveProperty("msg", "Product Not Found");
-  // });
+  test("testing delete Product if data by id not found", async () => {
+    const response = await request(app)
+      .delete("/products/1000")
+      .set("access_token", access_token);
+    expect(response.status).toBe(404);
+    expect(response.body).toHaveProperty("msg", "Product Not Found");
+  });
+  test("testing User isn't logged in and wants to delete products", async () => {
+    const response = await request(app).delete("/products/1");
+    expect(response.status).toBe(401);
+    expect(response.body).toHaveProperty("msg", "Please Login First");
+  });
   test("testing edit Product by id if success", async () => {
     const editProduct = {
       name: "Air Jordan 1 Bred Toe",
@@ -491,6 +496,22 @@ describe("test table Products", () => {
       .set("access_token", access_token);
     expect(response.status).toBe(404);
     expect(response.body).toHaveProperty("msg", "Product Not Found");
+  });
+  test("testing User isn't logged in and wants to edit products", async () => {
+    const editProduct = {
+      name: "Air Jordan 1 Bred Toe",
+      price: 8000000,
+      description:
+        "The Air Jordan 1 Retro High OG 'Patent Bred' treats the iconic colorway to a glossy makeover. Aside from the shoe's patent leather construction, the essential design DNA remains intact. The upper pairs basic black paneling with contrasting hits of Varsity Red on the toe box, Swoosh, heel overlay and collar flap. A woven Nike tag adorns the black nylon tongue, while a Wings logo is stamped on the lateral collar. The high-top rides on a sturdy rubber cupsole, enhanced with an Air-sole unit encapsulated in lightweight polyurethane.",
+      imgUrl:
+        "https://cdn.shopify.com/s/files/1/0516/0760/1336/products/Voila_1_f179f0c5-9c5e-43a6-9fe6-b5a252f55f5b_1000x.jpg?v=1642647113",
+      stock: 20,
+      CategoryId: 1,
+      color: "red",
+    };
+    const response = await request(app).put("/products/1").send(editProduct);
+    expect(response.status).toBe(401);
+    expect(response.body).toHaveProperty("msg", "Please Login First");
   });
 });
 
