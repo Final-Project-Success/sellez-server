@@ -40,6 +40,31 @@ class Controller {
       next(err);
     }
   }
+  static async checkOutOrder(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { totalPrice, shippingCost } = req.body;
+      const order = await Order.findByPk(id);
+
+      if (!order) {
+        throw {
+          name: "Order Not Found",
+        };
+      }
+
+      await Order.update(
+        {
+          totalPrice,
+          shippingCost,
+        },
+        { where: { id, status: false } }
+      );
+
+      res.status(200).json({ msg: "Success to order" });
+    } catch (err) {
+      next(err);
+    }
+  }
   static async updateStatusOrder(req, res, next) {
     try {
       const { id } = req.params;
