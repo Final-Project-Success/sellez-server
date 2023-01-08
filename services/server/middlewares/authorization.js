@@ -11,7 +11,7 @@ async function authorizationOrder(req, res, next) {
         status: false,
       },
     });
-    console.log(order, created);
+    // console.log(order, created);
 
     req.Order = {
       OrderId: order ? order.id : created.id,
