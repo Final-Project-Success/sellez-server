@@ -1,9 +1,18 @@
 const { Category } = require("../models");
+const redis = require("../config/connectRedis");
 
 class Controller {
   static async getCategory(req, res, next) {
     try {
+      const chaceData = await redis.get("sellez-categories");
+
+      if (chaceData) {
+        return JSON.parse(chaceData);
+      }
+
       const category = await Category.findAll();
+
+      await redis.set("sellez-categories", JSON.stringify(category));
 
       res.status(200).json(category);
     } catch (err) {
@@ -30,6 +39,8 @@ class Controller {
           name: "Category Not Found",
         };
       }
+
+      await redis.del("sellez-categories");
 
       res.status(200).json(categoryById);
     } catch (err) {
@@ -59,6 +70,8 @@ class Controller {
         }
       );
 
+      await redis.del("sellez-categories");
+
       res.status(200).json({
         message: `Category has been updated`,
       });
@@ -82,6 +95,8 @@ class Controller {
           id,
         },
       });
+
+      await redis.del("sellez-categories");
 
       res.status(200).json({
         message: `Category with name ${categoryById.name} has been deleted`,

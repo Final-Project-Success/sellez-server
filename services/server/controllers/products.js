@@ -1,11 +1,20 @@
 const { Product, Image, Category, sequelize } = require("../models/index");
+const redis = require("../config/connectRedis");
 
 class Controller {
   static async getProduct(req, res, next) {
     try {
+      const chaceData = await redis.get("sellez-products");
+
+      if (chaceData) {
+        return JSON.parse(chaceData);
+      }
+
       const dataProduct = await Product.findAll({
         include: Category,
       });
+
+      await redis.set("sellez-products", JSON.stringify(dataProduct));
 
       res.status(200).json(dataProduct);
     } catch (err) {
@@ -39,6 +48,8 @@ class Controller {
 
         return newData;
       });
+
+      await redis.del("sellez-products");
 
       res.status(201).json(result);
     } catch (err) {
@@ -93,6 +104,8 @@ class Controller {
         }
       );
 
+      await redis.del("sellez-products");
+
       res.status(200).json({
         msg: `Product with name ${productById.name} has been updated`,
       });
@@ -116,6 +129,8 @@ class Controller {
           id,
         },
       });
+
+      await redis.del("sellez-products");
 
       res.status(200).json({
         msg: `Product with name ${productById.name} has been deleted`,
