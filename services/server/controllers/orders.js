@@ -1,4 +1,11 @@
-const { Order } = require("../models");
+const { Order, User } = require("../models");
+const Xendit = require("xendit-node");
+const x = new Xendit({
+  secretKey: process.env.SECRET_XENDIT,
+});
+const { Invoice } = x;
+const invoiceSpecificOptions = {};
+const i = new Invoice(invoiceSpecificOptions);
 
 class Controller {
   static async addOrders(req, res, next) {
@@ -12,7 +19,31 @@ class Controller {
         status: false,
       });
 
-      res.status(201).json(newOrder);
+      let findedUser = await User.findByPk({ where: { id: UserId } });
+      let idPayout = "invoice-sellez-id-" + new Date().getTime().toString(); //
+      let createdInvoice = await i.createInvoice({
+        externalID: idPayout,
+        payerEmail: findedUser,
+        description: `Invoice for ${idPayout}`,
+        amount: totalPrice,
+        // ini nama itemnya ada apa aja (array of object)
+        items: [
+          {
+            name: "Air Conditioner",
+            quantity: 1,
+            price: 100000,
+            category: "Electronic",
+            url: "https://yourcompany.com/example_item",
+          },
+        ],
+        fees: [
+          {
+            type: "Handling Fee",
+            value: shippingCost,
+          },
+        ],
+      });
+      res.status(200).json(createdInvoice);
     } catch (err) {
       next(err);
     }
