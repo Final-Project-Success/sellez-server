@@ -5,6 +5,8 @@ const { hashPassword } = require("../helpers/bcrypt");
 const { jwtSign } = require("../helpers/jwt");
 const { queryInterface } = sequelize;
 
+let headers = process.env.RAJA_ONGKIR;
+let access_token;
 beforeAll(async () => {
   queryInterface.bulkInsert(
     "Users",
