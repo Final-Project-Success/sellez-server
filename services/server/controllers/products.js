@@ -7,7 +7,7 @@ class Controller {
       const chaceData = await redis.get("sellez-products");
 
       if (chaceData) {
-        return JSON.parse(chaceData);
+        return res.status(200).json(JSON.parse(chaceData));
       }
 
       const dataProduct = await Product.findAll({
