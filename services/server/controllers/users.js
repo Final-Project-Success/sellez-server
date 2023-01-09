@@ -62,7 +62,7 @@ class Controller {
   }
   static async oauthLogin(req, res, next) {
     try {
-      const { email, username, profilePict, phoneNumber } = req.body;
+      const { email, username, profilePict } = req.body;
       const [user, created] = await User.findOrCreate({
         where: { email },
         defaults: {
@@ -72,7 +72,7 @@ class Controller {
           address: "oauth",
           profilePict,
           role: "customer",
-          phoneNumber,
+          phoneNumber: "oauth",
         },
         hooks: false,
       });
