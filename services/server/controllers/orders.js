@@ -3,8 +3,7 @@ const redis = require("../config/connectRedis");
 const axios = require("axios");
 const Xendit = require("xendit-node");
 const x = new Xendit({
-  secretKey:
-    "xnd_development_Pty6063htungzNhy6dVevIoocvaQ6ekaGg3f4QUUii61sCAuHADwwqsi2yjvNa", //! sementara ini
+  secretKey: process.env.API_XENDIT,
 });
 
 const { Invoice, Payout } = x;
