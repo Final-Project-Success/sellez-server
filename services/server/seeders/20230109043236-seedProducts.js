@@ -28,7 +28,7 @@ module.exports = {
           name: "Wmns Air Jordan 1 Low SE 'Homage'",
           price: 1700000,
           description: "The women’s Air Jordan 1 Low SE ‘Homage’ showcases split color blocking that recalls the ‘Homage to Home’ Air Jordan 1 High from 2018. The tumbled leather upper on each shoe features a white base with contrasting black overlays on the lateral side, and a black base with white overlays on the medial side. The split theme extends to the Jumpman tongue tag and the Wings logo embroidered on the heel. Both shoes are mounted on a rubber cupsole, highlighted by white sidewalls and a black rubber outsole.",
-          imgUrl: "https://res.cloudinary.com/dqschoc1m/image/upload/v1673248653/JKT48/mitx4ryfqwqhtddvlds0.png",
+          imgUrl:"https://res.cloudinary.com/dqschoc1m/image/upload/v1673263399/JKT48/kvuviz4ewh1d0zjegrwd.png",
           stock: 45,
           CategoryId: 1,
           color: "from-green-500 to-emerald-500",
