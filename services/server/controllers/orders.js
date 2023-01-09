@@ -1,4 +1,5 @@
 const { Order } = require("../models");
+const redis = require("../config/connectRedis");
 
 class Controller {
   static async addOrders(req, res, next) {
@@ -12,6 +13,8 @@ class Controller {
         status: false,
       });
 
+      await redis.del("sellez-orders");
+
       res.status(201).json(newOrder);
     } catch (err) {
       next(err);
@@ -19,7 +22,16 @@ class Controller {
   }
   static async readAllOrders(req, res, next) {
     try {
+      const chaceData = await redis.get("sellez-orders");
+
+      if (chaceData) {
+        return res.status(200).json(JSON.parse(chaceData));
+      }
+
       const orders = await Order.findAll();
+
+      await redis.set("sellez-orders", JSON.stringify(orders));
+
       res.status(200).json(orders);
     } catch (err) {
       next(err);
@@ -60,6 +72,8 @@ class Controller {
         { where: { id, status: false } }
       );
 
+      await redis.del("sellez-orders");
+
       res.status(200).json({ msg: "Success to order" });
     } catch (err) {
       next(err);
@@ -77,6 +91,7 @@ class Controller {
       }
 
       await Order.update({ status: true }, { where: { id } });
+      await redis.del("sellez-orders");
 
       res.status(200).json({
         msg: "Order already paid",

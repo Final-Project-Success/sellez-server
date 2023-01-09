@@ -1,4 +1,5 @@
 const { OrderProduct } = require("../models");
+const redis = require("../config/connectRedis");
 
 class Controller {
   static async postOrderProduct(req, res, next) {
@@ -12,7 +13,9 @@ class Controller {
         price,
         subTotal: price * quantity,
       });
-      
+
+      await redis.del("sellez-orderProducts");
+
       res.status(201).json(newOrderProduct);
     } catch (err) {
       next(err);
@@ -20,7 +23,15 @@ class Controller {
   }
   static async getOrderProduct(req, res, next) {
     try {
+      const chaceData = await redis.get("sellez-orderProducts");
+
+      if (chaceData) {
+        return res.status(200).json(JSON.parse(chaceData));
+      }
+
       const orderProducts = await OrderProduct.findAll();
+
+      await redis.set("sellez-orderProducts", JSON.stringify(orderProducts));
 
       res.status(200).json(orderProducts);
     } catch (err) {
