@@ -1,4 +1,4 @@
-const { Order, User } = require("../models");
+const { Order, OrderProduct, Product, sequelize } = require("../models");
 const redis = require("../config/connectRedis");
 const axios = require("axios");
 const Xendit = require("xendit-node");
@@ -15,18 +15,38 @@ const p = new Payout(payoutSpecificOptions);
 class Controller {
   static async addOrders(req, res, next) {
     try {
-      const { totalPrice, shippingCost } = req.body;
+      const { totalPrice, shippingCost, products } = req.body;
+      console.log(req.body);
 
-      const newOrder = await Order.create({
-        totalPrice,
-        UserId: req.User.id,
-        shippingCost,
-        status: false,
+      const result = await sequelize.transaction(async (t) => {
+        const newOrder = await Order.create(
+          {
+            totalPrice,
+            UserId: req.User.id,
+            shippingCost,
+            status: false,
+          },
+          { transaction: t }
+        );
+
+        const data = products.map((el) => {
+          return {
+            ProductId: el.id,
+            OrderId: newOrder.id,
+            quantity: el.quantity,
+            price: el.price,
+            subTotal: el.price * el.quantity,
+          };
+        });
+
+        await OrderProduct.bulkCreate(data, { transaction: t });
+
+        return newOrder;
       });
-
+      await redis.del("sellez-orderProducts");
       await redis.del("sellez-orders");
 
-      res.status(201).json(newOrder);
+      res.status(201).json(result);
     } catch (err) {
       next(err);
     }
