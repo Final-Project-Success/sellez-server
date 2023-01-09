@@ -60,6 +60,30 @@ class Controller {
       next(err);
     }
   }
+  static async oauthLogin(req, res, next) {
+    try {
+      const { email } = req.body;
+      const [user, created] = await User.findOrCreate({
+        where: { email },
+        defaults: {
+          username: "oauth",
+          email,
+          password: "oauth",
+          address: "oauth",
+          profilePict: "oauth",
+          role: "customer",
+          phoneNumber: "oauth",
+        },
+        hooks: false,
+      });
+
+      const access_token = jwtSign({ id: user ? user.id : created.id });
+
+      res.status(200).json({ access_token, msg: "Login Success" });
+    } catch (err) {
+      next(err);
+    }
+  }
 }
 
 module.exports = Controller;
