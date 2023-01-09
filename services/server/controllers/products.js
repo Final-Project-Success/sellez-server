@@ -26,6 +26,7 @@ class Controller {
       const images = req.files;
       const { name, price, description, stock, CategoryId, color } = req.body;
       const result = await sequelize.transaction(async (t) => {
+        console.log(req.files, '<<<<<');
         const product = await Product.create(
           {
             name,
@@ -54,6 +55,7 @@ class Controller {
       res.status(201).json(result);
     } catch (err) {
       next(err);
+
     }
   }
   static async getDetailProduct(req, res, next) {
