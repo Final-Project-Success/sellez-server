@@ -61,6 +61,9 @@ module.exports = (sequelize, DataTypes) => {
           },
         },
       },
+      invoice: {
+        type: DataTypes.STRING,
+      },
     },
     {
       sequelize,

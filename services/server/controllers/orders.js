@@ -1,6 +1,17 @@
-const { Order } = require("../models");
+const { Order, User } = require("../models");
 const redis = require("../config/connectRedis");
 const axios = require("axios");
+const Xendit = require("xendit-node");
+const x = new Xendit({
+  secretKey:
+    "xnd_development_Pty6063htungzNhy6dVevIoocvaQ6ekaGg3f4QUUii61sCAuHADwwqsi2yjvNa", //! sementara ini
+});
+
+const { Invoice, Payout } = x;
+const invoiceSpecificOptions = {};
+const payoutSpecificOptions = {};
+const i = new Invoice(invoiceSpecificOptions);
+const p = new Payout(payoutSpecificOptions);
 
 class Controller {
   static async addOrders(req, res, next) {
