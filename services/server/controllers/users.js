@@ -77,8 +77,8 @@ class Controller {
       });
 
       res.status(201).json({
-        id: user.id,
-        email: user.email,
+        id: user ? user.id : created.id,
+        email: user ? user.email : created.email,
         msg: "Register Success!",
       });
     } catch (err) {
