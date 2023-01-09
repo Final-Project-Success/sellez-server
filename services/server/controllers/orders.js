@@ -76,14 +76,6 @@ class Controller {
         };
       }
 
-      await Order.update(
-        {
-          totalPrice,
-          shippingCost,
-        },
-        { where: { id, status: false } }
-      );
-
       let idPayout = "invoice-sellez-id-" + new Date().getTime().toString(); //
       let invoice = await i.createInvoice({
         externalID: idPayout,
@@ -107,6 +99,15 @@ class Controller {
         ],
       });
 
+      await Order.update(
+        {
+          totalPrice,
+          shippingCost,
+          invoice: invoice.id,
+        },
+        { where: { id, status: false } }
+      );
+
       await redis.del("sellez-orders");
 
       res.status(200).json({ msg: "Success to order", invoice: invoice });
@@ -117,7 +118,7 @@ class Controller {
   static async updateStatusOrder(req, res, next) {
     try {
       const { id } = req.params;
-      const order = await Order.findByPk(id);
+      const order = await Order.findOne({ where: { invoice: req.body.id } });
 
       if (!order) {
         throw {
@@ -125,8 +126,10 @@ class Controller {
         };
       }
 
-      await Order.update({ status: true }, { where: { id } });
+      await Order.update({ status: true }, { where: { invoice: req.body.id } });
       await redis.del("sellez-orders");
+
+      console.log("Order paid");
 
       res.status(200).json({
         msg: "Order already paid",

@@ -9,6 +9,6 @@ router
   .get("/cost", Controller.cost)
   .get("/:id", Controller.readOneOrder)
   .put("/:id", Controller.checkOutOrder)
-  .patch("/:id", Controller.updateStatusOrder);
+  .post("/:id", Controller.updateStatusOrder);
 
 module.exports = router;
