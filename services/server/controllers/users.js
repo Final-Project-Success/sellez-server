@@ -62,15 +62,15 @@ class Controller {
   }
   static async oauthLogin(req, res, next) {
     try {
-      const { email } = req.body;
+      const { email, username, profilePict } = req.body;
       const [user, created] = await User.findOrCreate({
         where: { email },
         defaults: {
-          username: "oauth",
+          username,
           email,
           password: "oauth",
           address: "oauth",
-          profilePict: "oauth",
+          profilePict,
           role: "customer",
           phoneNumber: "oauth",
         },
@@ -82,6 +82,42 @@ class Controller {
       res.status(200).json({ access_token, msg: "Login Success" });
     } catch (err) {
       next(err);
+    }
+  }
+  static async getOTP(req, res, next) {
+    try {
+      //! authentication required !
+      let { email } = req.User;
+      let otp = otpGenerator.generate(10, {});
+
+      const transporter = nodemailer.createTransport({
+        host: "smtp.gmail.com",
+        port: 465,
+        secure: true, // use SSL
+        auth: {
+          user: process.env.EMAIL,
+          pass: process.env.PASSWORD,
+        },
+      });
+
+      var mailOptions = {
+        from: process.env.EMAIL,
+        to: email,
+        subject: "Activation code",
+        html: `<h1>Hai </h1>
+          <p>Udah ga sabar kan buat belanja belanja di SellEz? Berikut Activation code kamu : ${otp}</p>`,
+      };
+
+      transporter.sendMail(mailOptions, function (error, info) {
+        if (error) {
+          console.log(error);
+        } else {
+          console.log("Email sent: " + info.response);
+        }
+      });
+      res.json({ message: "OTP has been sended" });
+    } catch (error) {
+      next(error);
     }
   }
 }

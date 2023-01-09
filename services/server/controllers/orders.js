@@ -1,22 +1,52 @@
-const { Order } = require("../models");
+const { Order, OrderProduct, Product, sequelize } = require("../models");
 const redis = require("../config/connectRedis");
 const axios = require("axios");
+const Xendit = require("xendit-node");
+const x = new Xendit({
+  secretKey: process.env.API_XENDIT,
+});
+
+const { Invoice, Payout } = x;
+const invoiceSpecificOptions = {};
+const payoutSpecificOptions = {};
+const i = new Invoice(invoiceSpecificOptions);
+const p = new Payout(payoutSpecificOptions);
 
 class Controller {
   static async addOrders(req, res, next) {
     try {
-      const { totalPrice, shippingCost } = req.body;
+      const { totalPrice, shippingCost, products } = req.body;
+      console.log(req.body);
 
-      const newOrder = await Order.create({
-        totalPrice,
-        UserId: req.User.id,
-        shippingCost,
-        status: false,
+      const result = await sequelize.transaction(async (t) => {
+        const newOrder = await Order.create(
+          {
+            totalPrice,
+            UserId: req.User.id,
+            shippingCost,
+            status: false,
+          },
+          { transaction: t }
+        );
+
+        const data = products.map((el) => {
+          return {
+            ProductId: el.id,
+            OrderId: newOrder.id,
+            quantity: el.quantity,
+            price: el.price,
+            subTotal: el.price * el.quantity,
+          };
+        });
+
+        await OrderProduct.bulkCreate(data, { transaction: t });
+
+        return newOrder;
       });
-
+      await redis.del("sellez-orderProducts");
       await redis.del("sellez-orders");
 
-      res.status(201).json(newOrder);
+      res.status(201).json(result);
     } catch (err) {
       next(err);
     }
@@ -65,17 +95,41 @@ class Controller {
         };
       }
 
+      let idPayout = "invoice-sellez-id-" + new Date().getTime().toString(); //
+      let invoice = await i.createInvoice({
+        externalID: idPayout,
+        payerEmail: order.User.email,
+        description: `Invoice for ${idPayout}`,
+        amount: totalPrice,
+        items: [
+          {
+            name: "Air Conditioner",
+            quantity: 1,
+            price: 100000,
+            category: "Electronic",
+            url: "https://yourcompany.com/example_item",
+          },
+        ],
+        fees: [
+          {
+            type: "Handling Fee",
+            value: shippingCost,
+          },
+        ],
+      });
+
       await Order.update(
         {
           totalPrice,
           shippingCost,
+          invoice: invoice.id,
         },
         { where: { id, status: false } }
       );
 
       await redis.del("sellez-orders");
 
-      res.status(200).json({ msg: "Success to order" });
+      res.status(200).json({ msg: "Success to order", invoice: invoice });
     } catch (err) {
       next(err);
     }
@@ -83,7 +137,7 @@ class Controller {
   static async updateStatusOrder(req, res, next) {
     try {
       const { id } = req.params;
-      const order = await Order.findByPk(id);
+      const order = await Order.findOne({ where: { invoice: req.body.id } });
 
       if (!order) {
         throw {
@@ -91,8 +145,10 @@ class Controller {
         };
       }
 
-      await Order.update({ status: true }, { where: { id } });
+      await Order.update({ status: true }, { where: { invoice: req.body.id } });
       await redis.del("sellez-orders");
+
+      console.log("Order paid");
 
       res.status(200).json({
         msg: "Order already paid",
