@@ -60,7 +60,7 @@ class Controller {
       next(err);
     }
   }
-  static async oauthRegister(req, res, next) {
+  static async oauthLogin(req, res, next) {
     try {
       const { email } = req.body;
       const [user, created] = await User.findOrCreate({
@@ -74,13 +74,12 @@ class Controller {
           role: "customer",
           phoneNumber: "oauth",
         },
+        hooks: false,
       });
 
-      res.status(201).json({
-        id: user ? user.id : created.id,
-        email: user ? user.email : created.email,
-        msg: "Register Success!",
-      });
+      const access_token = jwtSign({ id: user ? user.id : created.id });
+
+      res.status(200).json({ access_token, msg: "Login Success" });
     } catch (err) {
       next(err);
     }
