@@ -84,7 +84,7 @@ class Controller {
       next(err);
     }
   }
-  static async verificationEmail(req, res, next) {
+  static async getOTP(req, res, next) {
     try {
       //! authentication required !
       let { email } = req.User;
