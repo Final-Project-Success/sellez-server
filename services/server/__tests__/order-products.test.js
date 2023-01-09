@@ -3,6 +3,7 @@ const request = require("supertest");
 const { sequelize, OrderProduct } = require("../models");
 const { hashPassword } = require("../helpers/bcrypt");
 const { jwtSign } = require("../helpers/jwt");
+const redis = require("../config/connectRedis");
 const { queryInterface } = sequelize;
 
 let access_token;
@@ -72,6 +73,10 @@ beforeAll(async () => {
     {}
   );
 });
+beforeEach(() => {
+  jest.restoreAllMocks();
+  redis.del("sellez-orderProducts");
+});
 
 const createOrderProduct = {
   ProductId: 1,
@@ -102,17 +107,28 @@ describe("test table OrderProducts", () => {
     expect(response.status).toBe(401);
     expect(response.body).toHaveProperty("msg", "Please Login First");
   });
-  // test("testing table read OrderProducts if error", async () => {
-  //   jest
-  //     .spyOn(OrderProduct, "findAll")
-  //     .mockImplementationOnce(() =>
-  //       Promise.reject({ name: "something wrong" })
-  //     );
-  //   const response = await request(app)
-  //     .get("/order-products")
-  //     .set("access_token", access_token);
-  //   expect(response.status).toBe(500);
-  // });
+  test("testing table read OrderProducts if error", async () => {
+    jest
+      .spyOn(OrderProduct, "findAll")
+      .mockImplementationOnce(() =>
+        Promise.reject({ name: "something wrong" })
+      );
+    const response = await request(app)
+      .get("/order-products")
+      .set("access_token", access_token);
+    expect(response.status).toBe(500);
+  });
+  test("testing using chace", async () => {
+    jest
+      .spyOn(redis, "get")
+      .mockImplementationOnce(() => Promise.resolve(JSON.stringify([])));
+    const response = await request(app)
+      .get("/order-products")
+      .set("access_token", access_token);
+    // console.log(response.status);
+    expect(response.status).toBe(200);
+    expect(response.body).toBeInstanceOf(Object);
+  });
   test("testing read OrderProducts by Id", async () => {
     const response = await request(app)
       .get("/order-products/1")

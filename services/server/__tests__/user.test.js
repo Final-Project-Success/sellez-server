@@ -1,6 +1,6 @@
 const app = require("../app");
 const request = require("supertest");
-const { sequelize } = require("../models");
+const { sequelize, User } = require("../models");
 const { hashPassword } = require("../helpers/bcrypt");
 const { queryInterface } = sequelize;
 
@@ -170,6 +170,38 @@ describe("test table Users", () => {
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty("access_token", expect.any(String));
   });
+  test("testing login with oauth", async () => {
+    const data = {
+      username: "oauth",
+      email: "oauth@gmail.com",
+      password: "oauth",
+      address: "oauth",
+      profilePict: "oauth",
+      role: "customer",
+      phoneNumber: "oauth",
+    };
+    const response = await request(app).post("/login-oauth").send(data);
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty("access_token", expect.any(String));
+    expect(response.body).toHaveProperty("msg", "Login Success");
+  });
+  // test("testing login if email doesn't match", async () => {
+  //   const data = {
+  //     username: "oauth",
+  //     email: "",
+  //     password: "oauth",
+  //     address: "oauth",
+  //     profilePict: "oauth",
+  //     role: "customer",
+  //     phoneNumber: "oauth",
+  //   };
+  //   const response = await request(app).post("/login-oauth").send(data);
+  //   expect(response.status).toBe(400);
+  //   expect(response.body).toHaveProperty(
+  //     "msg",
+  //     "Error invalid email or password"
+  //   );
+  // });
   test("testing login if email doesn't match", async () => {
     const data = {
       ...dataUser,
@@ -218,26 +250,6 @@ describe("test table Users", () => {
       "Error invalid email or password"
     );
   });
-  //   test("testing find User by Id", async () => {
-  //     const response = await request(app).get("/1");
-  //     expect(response.status).toBe(200);
-  //     expect(response.body).toBeInstanceOf(Object);
-  //   });
-  //   test("testing find User by Id not found", async () => {
-  //     const response = await request(app).get("/1000");
-  //     expect(response.status).toBe(404);
-  //     expect(response.body).toHaveProperty("msg", "User Not Found");
-  //   });
-  // test("testing User isn't logged in and wants to hit endpoint products", async () => {
-  //   const data = {
-  //     ...dataUser,
-  //     username: "user1000@gmail.com",
-  //     password: "user1000@gmail.com",
-  //   };
-  //   const response = await request(app).get("/products/1").send(data);
-  //   expect(response.status).toBe(404);
-  //   expect(response.body).toHaveProperty("msg", "User Not Found");
-  // });
 });
 
 afterAll(async () => {

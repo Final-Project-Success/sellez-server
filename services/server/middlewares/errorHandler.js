@@ -1,5 +1,5 @@
 function errorHandler(err, req, res, next) {
-  console.log(err);
+  // console.log(err);
   let status = 500;
   let msg = "Internal Server Error";
 
@@ -21,10 +21,10 @@ function errorHandler(err, req, res, next) {
       msg = "Error invalid email or password";
       break;
 
-    case "Product id is required":
-      status = 400;
-      msg = "Product id is required";
-      break;
+    // case "Product id is required":
+    //   status = 400;
+    //   msg = "Product id is required";
+    //   break;
 
     case "Category Not Found":
       status = 404;

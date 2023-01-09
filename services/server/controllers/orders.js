@@ -103,15 +103,16 @@ class Controller {
   }
   static async destination(req, res, next) {
     try {
-      const { data } = await axios({
+      const data = await axios({
         method: `GET`,
         url: `https://api.rajaongkir.com/starter/city`,
         headers: {
           key: process.env.RAJA_ONGKIR,
         },
       });
-      res.status(200).json(data);
+      res.status(200).json(data.data);
     } catch (error) {
+      console.log(error, "<><><><><>><> TETSTSTTS");
       next(error);
     }
   }
@@ -147,7 +148,7 @@ class Controller {
 
       res.status(200).json(data.rajaongkir);
     } catch (error) {
-      res.status(500).json(error);
+      console.log(error, "<><><<><><><><><><><><><><");
       next(error);
     }
   }

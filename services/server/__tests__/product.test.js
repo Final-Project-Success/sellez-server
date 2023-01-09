@@ -3,7 +3,10 @@ const request = require("supertest");
 const { sequelize, Product } = require("../models");
 const { jwtSign } = require("../helpers/jwt");
 const { hashPassword } = require("../helpers/bcrypt");
+const redis = require("../config/connectRedis");
+const cloudinary = require("cloudinary").v2;
 const { queryInterface } = sequelize;
+jest.setTimeout(30000);
 
 let access_token;
 beforeAll(async () => {
@@ -74,25 +77,36 @@ beforeAll(async () => {
     },
   ]);
 });
+beforeEach(() => {
+  jest.restoreAllMocks();
+  redis.del("sellez-products");
+  jest.mock("multer", () => {
+    const multer = () => {
+      return {
+        array: () => {
+          return (req, res, next) => {
+            req.files = [
+              {
+                url: "http://mock.url/a.png",
+              },
+            ];
+            return next();
+          };
+        },
+      };
+    };
+    return multer;
+  });
+});
 
 const createProduct = {
   name: "Air Jordan 1 Royal Blue",
   price: 7000000,
   description:
     "The Air Jordan 1 Retro High OG 'Dark Marina Blue' dresses the iconic silhouette in classic two-tone color blocking. The all-leather upper features a black base with contrasting dark blue overlays along the forefoot, heel, collar and eyestay. A matching blue Swoosh is accompanied by a Jordan Wings logo stamped in black on the lateral collar flap. Atop the nylon tongue, a woven Nike Air tag nods to the shoe's retro cushioning technology: an Air-sole unit encapsulated in polyurethane nestled in the heel of the rubber cupsole.",
-  imgUrl:
-    "http://cdn.shopify.com/s/files/1/0516/0760/1336/products/3product-555088-404-Xms-2022-03-08T0958490700_1200x1200.jpg?v=1646708344",
   stock: 10,
   CategoryId: 1,
   color: "red",
-  imgUrl1:
-    "http://cdn.shopify.com/s/files/1/0516/0760/1336/products/3product-555088-404-Xms-2022-03-08T0958490700_1200x1200.jpg?v=1646708344",
-  imgUrl2:
-    "http://cdn.shopify.com/s/files/1/0516/0760/1336/products/3product-555088-404-Xms-2022-03-08T0958490700_1200x1200.jpg?v=1646708344",
-  imgUrl3:
-    "http://cdn.shopify.com/s/files/1/0516/0760/1336/products/3product-555088-404-Xms-2022-03-08T0958490700_1200x1200.jpg?v=1646708344",
-  imgUrl4:
-    "http://cdn.shopify.com/s/files/1/0516/0760/1336/products/3product-555088-404-Xms-2022-03-08T0958490700_1200x1200.jpg?v=1646708344",
 };
 describe("test table Products", () => {
   test("testing read Product if Success", async () => {
@@ -108,6 +122,24 @@ describe("test table Products", () => {
       expect(el).toHaveProperty("CategoryId", expect.any(Number));
       expect(el).toHaveProperty("color", expect.any(String));
     });
+  });
+  test("testing read Product if error", async () => {
+    jest
+      .spyOn(Product, "findAll")
+      .mockRejectedValue(() => Promise.reject({ name: "something wrong" }));
+    const response = await request(app).get("/products");
+    expect(response.status).toBe(500);
+  });
+  test("testing using chace", async () => {
+    jest
+      .spyOn(redis, "get")
+      .mockImplementationOnce(() => Promise.resolve(JSON.stringify([])));
+    const response = await request(app)
+      .get("/products")
+      .set("access_token", access_token);
+    // console.log(response.status);
+    expect(response.status).toBe(200);
+    expect(response.body).toBeInstanceOf(Object);
   });
   test("testing read Product by Id", async () => {
     const response = await request(app).get("/products/1");
@@ -126,324 +158,166 @@ describe("test table Products", () => {
     expect(response.status).toBe(404);
     expect(response.body).toHaveProperty("msg", "Product Not Found");
   });
-  // test("testing create Product if success", async () => {
-  //   const response = await request(app)
-  //     .post("/products")
-  //     .send(createProduct)
-  //     .set("access_token", access_token);
-  //   expect(response.status).toBe(201);
-  //   expect(response.body.dataValues).toHaveProperty("name", expect.any(String));
-  //   expect(response.body.dataValues).toHaveProperty(
-  //     "price",
-  //     expect.any(Number)
-  //   );
-  //   expect(response.body.dataValues).toHaveProperty(
-  //     "description",
-  //     expect.any(String)
-  //   );
-  //   expect(response.body.dataValues).toHaveProperty(
-  //     "imgUrl",
-  //     expect.any(String)
-  //   );
-  //   expect(response.body.dataValues).toHaveProperty(
-  //     "stock",
-  //     expect.any(Number)
-  //   );
-  //   expect(response.body.dataValues).toHaveProperty(
-  //     "CategoryId",
-  //     expect.any(Number)
-  //   );
-  //   expect(response.body.dataValues).toHaveProperty(
-  //     "color",
-  //     expect.any(String)
-  //   );
-  // });
-  // test("testing create Product if name is null", async () => {
-  //   const data = {
-  //     ...createProduct,
-  //     name: null,
-  //   };
-  //   const response = await request(app)
-  //     .post("/products")
-  //     .send(data)
-  //     .set("access_token", access_token);
-  //   expect(response.status).toBe(400);
-  //   expect(response.body).toHaveProperty("msg", "Name is required");
-  // });
-  // test("testing create Product if name is empty", async () => {
-  //   const data = {
-  //     ...createProduct,
-  //     name: "",
-  //   };
-  //   const response = await request(app)
-  //     .post("/products")
-  //     .send(data)
-  //     .set("access_token", access_token);
-  //   expect(response.status).toBe(400);
-  //   expect(response.body).toHaveProperty("msg", "Name is required");
-  // });
-  // test("testing create Product if Price is null", async () => {
-  //   const data = {
-  //     ...createProduct,
-  //     price: null,
-  //   };
-  //   const response = await request(app)
-  //     .post("/products")
-  //     .send(data)
-  //     .set("access_token", access_token);
-  //   expect(response.status).toBe(400);
-  //   expect(response.body).toHaveProperty("msg", "Price is required");
-  // });
-  // test("testing create Product if Price is empty", async () => {
-  //   const data = {
-  //     ...createProduct,
-  //     price: "",
-  //   };
-  //   const response = await request(app)
-  //     .post("/products")
-  //     .send(data)
-  //     .set("access_token", access_token);
-  //   expect(response.status).toBe(400);
-  //   expect(response.body).toHaveProperty("msg", "Price is required");
-  // });
-  // test("testing create Product if description is null", async () => {
-  //   const data = {
-  //     ...createProduct,
-  //     description: null,
-  //   };
-  //   const response = await request(app)
-  //     .post("/products")
-  //     .send(data)
-  //     .set("access_token", access_token);
-  //   expect(response.status).toBe(400);
-  //   expect(response.body).toHaveProperty("msg", "Description is required");
-  // });
-  // test("testing create Product if description is empty", async () => {
-  //   const data = {
-  //     ...createProduct,
-  //     description: "",
-  //   };
-  //   const response = await request(app)
-  //     .post("/products")
-  //     .send(data)
-  //     .set("access_token", access_token);
-  //   expect(response.status).toBe(400);
-  //   expect(response.body).toHaveProperty("msg", "Description is required");
-  // });
-  // test("testing create imgUrl if description is null", async () => {
-  //   const data = {
-  //     ...createProduct,
-  //     imgUrl: null,
-  //   };
-  //   const response = await request(app)
-  //     .post("/products")
-  //     .send(data)
-  //     .set("access_token", access_token);
-  //   expect(response.status).toBe(400);
-  //   expect(response.body).toHaveProperty("msg", "Image Url is required");
-  // });
-  // test("testing create Product if img Url is empty", async () => {
-  //   const data = {
-  //     ...createProduct,
-  //     imgUrl: "",
-  //   };
-  //   const response = await request(app)
-  //     .post("/products")
-  //     .send(data)
-  //     .set("access_token", access_token);
-  //   expect(response.status).toBe(400);
-  //   expect(response.body).toHaveProperty("msg", "Image Url is required");
-  // });
-  // test("testing create stock if stock is null", async () => {
-  //   const data = {
-  //     ...createProduct,
-  //     stock: null,
-  //   };
-  //   const response = await request(app)
-  //     .post("/products")
-  //     .send(data)
-  //     .set("access_token", access_token);
-  //   expect(response.status).toBe(400);
-  //   expect(response.body).toHaveProperty("msg", "Stock is required");
-  // });
-  // test("testing create Product if stock is empty", async () => {
-  //   const data = {
-  //     ...createProduct,
-  //     stock: "",
-  //   };
-  //   const response = await request(app)
-  //     .post("/products")
-  //     .send(data)
-  //     .set("access_token", access_token);
-  //   expect(response.status).toBe(400);
-  //   expect(response.body).toHaveProperty("msg", "Stock is required");
-  // });
-  // test("testing create Product if stock is 0", async () => {
-  //   const data = {
-  //     ...createProduct,
-  //     stock: 0,
-  //   };
-  //   const response = await request(app)
-  //     .post("/products")
-  //     .send(data)
-  //     .set("access_token", access_token);
-  //   expect(response.status).toBe(400);
-  //   expect(response.body).toHaveProperty("msg", "Stock min is 1");
-  // });
-  // test("testing create stock if CategoryId is null", async () => {
-  //   const data = {
-  //     ...createProduct,
-  //     CategoryId: null,
-  //   };
-  //   const response = await request(app)
-  //     .post("/products")
-  //     .send(data)
-  //     .set("access_token", access_token);
-  //   expect(response.status).toBe(400);
-  //   expect(response.body).toHaveProperty("msg", "Category id is required");
-  // });
-  // test("testing create Product if CategoryId is empty", async () => {
-  //   const data = {
-  //     ...createProduct,
-  //     CategoryId: "",
-  //   };
-  //   const response = await request(app)
-  //     .post("/products")
-  //     .send(data)
-  //     .set("access_token", access_token);
-  //   expect(response.status).toBe(400);
-  //   expect(response.body).toHaveProperty("msg", "Category id is required");
-  // });
-  // test("testing create stock if color is null", async () => {
-  //   const data = {
-  //     ...createProduct,
-  //     color: null,
-  //   };
-  //   const response = await request(app)
-  //     .post("/products")
-  //     .send(data)
-  //     .set("access_token", access_token);
-  //   expect(response.status).toBe(400);
-  //   expect(response.body).toHaveProperty("msg", "Color is required");
-  // });
-  // test("testing create Product if Color is empty", async () => {
-  //   const data = {
-  //     ...createProduct,
-  //     color: "",
-  //   };
-  //   const response = await request(app)
-  //     .post("/products")
-  //     .send(data)
-  //     .set("access_token", access_token);
-  //   expect(response.status).toBe(400);
-  //   expect(response.body).toHaveProperty("msg", "Color is required");
-  // });
-  // test("testing create stock if Image Url 1 is null", async () => {
-  //   const data = {
-  //     ...createProduct,
-  //     imgUrl1: null,
-  //   };
-  //   const response = await request(app)
-  //     .post("/products")
-  //     .send(data)
-  //     .set("access_token", access_token);
-  //   expect(response.status).toBe(400);
-  //   expect(response.body).toHaveProperty("msg", "Image url is required");
-  // });
-  // test("testing create Product if Image Url 1 is empty", async () => {
-  //   const data = {
-  //     ...createProduct,
-  //     imgUrl1: "",
-  //   };
-  //   const response = await request(app)
-  //     .post("/products")
-  //     .send(data)
-  //     .set("access_token", access_token);
-  //   expect(response.status).toBe(400);
-  //   expect(response.body).toHaveProperty("msg", "Image url is required");
-  // });
-  // test("testing create stock if Image Url 2 is null", async () => {
-  //   const data = {
-  //     ...createProduct,
-  //     imgUrl2: null,
-  //   };
-  //   const response = await request(app)
-  //     .post("/products")
-  //     .send(data)
-  //     .set("access_token", access_token);
-  //   expect(response.status).toBe(400);
-  //   expect(response.body).toHaveProperty("msg", "Image url is required");
-  // });
-  // test("testing create Product if Image Url 2 is empty", async () => {
-  //   const data = {
-  //     ...createProduct,
-  //     imgUrl2: "",
-  //   };
-  //   const response = await request(app)
-  //     .post("/products")
-  //     .send(data)
-  //     .set("access_token", access_token);
-  //   expect(response.status).toBe(400);
-  //   expect(response.body).toHaveProperty("msg", "Image url is required");
-  // });
-  // test("testing create stock if Image Url 3 is null", async () => {
-  //   const data = {
-  //     ...createProduct,
-  //     imgUrl3: null,
-  //   };
-  //   const response = await request(app)
-  //     .post("/products")
-  //     .send(data)
-  //     .set("access_token", access_token);
-  //   expect(response.status).toBe(400);
-  //   expect(response.body).toHaveProperty("msg", "Image url is required");
-  // });
-  // test("testing create Product if Image Url 3 is empty", async () => {
-  //   const data = {
-  //     ...createProduct,
-  //     imgUrl3: "",
-  //   };
-  //   const response = await request(app)
-  //     .post("/products")
-  //     .send(data)
-  //     .set("access_token", access_token);
-  //   expect(response.status).toBe(400);
-  //   expect(response.body).toHaveProperty("msg", "Image url is required");
-  // });
-  // test("testing create stock if Image Url 4 is null", async () => {
-  //   const data = {
-  //     ...createProduct,
-  //     imgUrl4: null,
-  //   };
-  //   const response = await request(app)
-  //     .post("/products")
-  //     .send(data)
-  //     .set("access_token", access_token);
-  //   expect(response.status).toBe(400);
-  //   expect(response.body).toHaveProperty("msg", "Image url is required");
-  // });
-  // test("testing create Product if Image Url 4 is empty", async () => {
-  //   const data = {
-  //     ...createProduct,
-  //     imgUrl4: "",
-  //   };
-  //   const response = await request(app)
-  //     .post("/products")
-  //     .send(data)
-  //     .set("access_token", access_token);
-  //   expect(response.status).toBe(400);
-  //   expect(response.body).toHaveProperty("msg", "Image url is required");
-  // });
-  // test("testing delete Product if success", async () => {
-  //   const response = await request(app)
-  //     .delete("/products/2")
-  //     .set("access_token", access_token);
-  //   expect(response.status).toBe(200);
-  //   expect(response.body).toHaveProperty(
-  //     "msg",
-  //     "Product with name Air Jordan 1 Royal Blue has been deleted"
-  //   );
-  // });
+  test("testing create Product if success", async () => {
+    const response = await request(app)
+      .post("/products")
+      .field("name", createProduct.name)
+      .field("price", createProduct.price)
+      .field("description", createProduct.description)
+      .field("CategoryId", createProduct.CategoryId)
+      .field("color", createProduct.color)
+      .field("stock", createProduct.stock)
+      .attach("imgUrl", "__tests__/images/gambar1-1.png")
+      .attach("imgUrl", "__tests__/images/gambar1-2.png")
+      // .attach("imgUrl", "__tests__/images/gambar1-3.png")
+      // .attach("imgUrl", "__tests__/images/gambar1-4.png")
+      .set("access_token", access_token);
+    expect(response.status).toBe(201);
+    expect(response.body.dataValues).toHaveProperty("name", expect.any(String));
+    expect(response.body.dataValues).toHaveProperty(
+      "price",
+      expect.any(Number)
+    );
+    expect(response.body.dataValues).toHaveProperty(
+      "description",
+      expect.any(String)
+    );
+    expect(response.body.dataValues).toHaveProperty(
+      "imgUrl",
+      expect.any(String)
+    );
+    expect(response.body.dataValues).toHaveProperty(
+      "stock",
+      expect.any(Number)
+    );
+    expect(response.body.dataValues).toHaveProperty(
+      "CategoryId",
+      expect.any(Number)
+    );
+    expect(response.body.dataValues).toHaveProperty(
+      "color",
+      expect.any(String)
+    );
+  });
+  test("testing create Product if name is empty", async () => {
+    const response = await request(app)
+      .post("/products")
+      .field("name", "")
+      .field("price", createProduct.price)
+      .field("description", createProduct.description)
+      .field("CategoryId", createProduct.CategoryId)
+      .field("color", createProduct.color)
+      .field("stock", createProduct.stock)
+      .attach("imgUrl", "__tests__/images/gambar1-1.png")
+      .attach("imgUrl", "__tests__/images/gambar1-2.png")
+      .set("access_token", access_token);
+    expect(response.status).toBe(400);
+    expect(response.body).toHaveProperty("msg", "Name is required");
+  });
+  test("testing create Product if Price is empty", async () => {
+    const response = await request(app)
+      .post("/products")
+      .field("name", createProduct.name)
+      .field("price", "")
+      .field("description", createProduct.description)
+      .field("CategoryId", createProduct.CategoryId)
+      .field("color", createProduct.color)
+      .field("stock", createProduct.stock)
+      .attach("imgUrl", "__tests__/images/gambar1-1.png")
+      .attach("imgUrl", "__tests__/images/gambar1-2.png")
+      .set("access_token", access_token);
+    expect(response.status).toBe(400);
+    expect(response.body).toHaveProperty("msg", "Price is required");
+  });
+  test("testing create Product if description is empty", async () => {
+    const data = {
+      ...createProduct,
+      description: null,
+    };
+    const response = await request(app)
+      .post("/products")
+      .field("name", createProduct.name)
+      .field("price", createProduct.price)
+      .field("description", "")
+      .field("CategoryId", createProduct.CategoryId)
+      .field("color", createProduct.color)
+      .field("stock", createProduct.stock)
+      .attach("imgUrl", "__tests__/images/gambar1-1.png")
+      .attach("imgUrl", "__tests__/images/gambar1-2.png")
+      .set("access_token", access_token);
+    expect(response.status).toBe(400);
+    expect(response.body).toHaveProperty("msg", "Description is required");
+  });
+  test("testing create Product if stock is empty", async () => {
+    const response = await request(app)
+      .post("/products")
+      .field("name", createProduct.name)
+      .field("price", createProduct.price)
+      .field("description", createProduct.description)
+      .field("CategoryId", createProduct.CategoryId)
+      .field("color", createProduct.color)
+      .field("stock", "")
+      .attach("imgUrl", "__tests__/images/gambar1-1.png")
+      .attach("imgUrl", "__tests__/images/gambar1-2.png")
+      .set("access_token", access_token);
+    expect(response.status).toBe(400);
+    expect(response.body).toHaveProperty("msg", "Stock is required");
+  });
+  test("testing create Product if stock is 0", async () => {
+    const response = await request(app)
+      .post("/products")
+      .field("name", createProduct.name)
+      .field("price", createProduct.price)
+      .field("description", createProduct.description)
+      .field("CategoryId", createProduct.CategoryId)
+      .field("color", createProduct.color)
+      .field("stock", 0)
+      .attach("imgUrl", "__tests__/images/gambar1-1.png")
+      .attach("imgUrl", "__tests__/images/gambar1-2.png")
+      .set("access_token", access_token);
+    expect(response.status).toBe(400);
+    expect(response.body).toHaveProperty("msg", "Stock min is 1");
+  });
+  test("testing create Product if CategoryId is empty", async () => {
+    const response = await request(app)
+      .post("/products")
+      .field("name", createProduct.name)
+      .field("price", createProduct.price)
+      .field("description", createProduct.description)
+      .field("CategoryId", "")
+      .field("color", createProduct.color)
+      .field("stock", createProduct.stock)
+      .attach("imgUrl", "__tests__/images/gambar1-1.png")
+      .attach("imgUrl", "__tests__/images/gambar1-2.png")
+      .set("access_token", access_token);
+    expect(response.status).toBe(400);
+    expect(response.body).toHaveProperty("msg", "Category id is required");
+  });
+  test("testing create Product if Color is empty", async () => {
+    const response = await request(app)
+      .post("/products")
+      .field("name", createProduct.name)
+      .field("price", createProduct.price)
+      .field("description", createProduct.description)
+      .field("CategoryId", createProduct.CategoryId)
+      .field("color", "")
+      .field("stock", createProduct.stock)
+      .attach("imgUrl", "__tests__/images/gambar1-1.png")
+      .attach("imgUrl", "__tests__/images/gambar1-2.png")
+      .set("access_token", access_token);
+    expect(response.status).toBe(400);
+    expect(response.body).toHaveProperty("msg", "Color is required");
+  });
+  test("testing delete Product if success", async () => {
+    const response = await request(app)
+      .delete("/products/2")
+      .set("access_token", access_token);
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty(
+      "msg",
+      "Product with name Air Jordan 1 Royal Blue has been deleted"
+    );
+  });
   test("testing delete Product if data by id not found", async () => {
     const response = await request(app)
       .delete("/products/1000")

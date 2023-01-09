@@ -4,13 +4,13 @@ const orderRouter = require("./orders");
 const productRouter = require("./products");
 const userRouter = require("./users");
 const orderProductRouter = require("./order-products");
-const { authentication } = require("../middlewares/authentication");
+const { authenticationAdmin } = require("../middlewares/authentication");
 
 router
   .use("/", userRouter)
   .use("/products", productRouter)
   .use("/categories", categoryRouter)
-  .use(authentication)
+  .use(authenticationAdmin)
   .use("/order-products", orderProductRouter)
   .use("/orders", orderRouter);
 

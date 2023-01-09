@@ -1,12 +1,16 @@
 const app = require("../app");
+const axios = require("axios");
 const request = require("supertest");
 const { sequelize, Order } = require("../models");
 const { hashPassword } = require("../helpers/bcrypt");
 const { jwtSign } = require("../helpers/jwt");
+const redis = require("../config/connectRedis");
+const { text } = require("express");
 const { queryInterface } = sequelize;
 
 let headers = process.env.RAJA_ONGKIR;
 let access_token;
+jest.mock("axios");
 beforeAll(async () => {
   queryInterface.bulkInsert(
     "Users",
@@ -60,6 +64,10 @@ beforeAll(async () => {
     },
   ]);
 });
+beforeEach(() => {
+  jest.restoreAllMocks();
+  redis.del("sellez-orders");
+});
 
 const createOrder = {
   totalPrice: 50000,
@@ -88,17 +96,28 @@ describe("test table Orders", () => {
       expect(el).toHaveProperty("updatedAt", expect.any(String));
     });
   });
-  // test("testing table read Orders if error", async () => {
-  //   jest
-  //     .spyOn(Order, "findAll")
-  //     .mockImplementationOnce(() =>
-  //       Promise.reject({ name: "something wrong" })
-  //     );
-  //   const response = await request(app)
-  //     .get("/orders")
-  //     .set("access_token", access_token);
-  //   expect(response.status).toBe(500);
-  // });
+  test("testing table read Orders if error", async () => {
+    jest
+      .spyOn(Order, "findAll")
+      .mockImplementationOnce(() =>
+        Promise.reject({ name: "something wrong" })
+      );
+    const response = await request(app)
+      .get("/orders")
+      .set("access_token", access_token);
+    expect(response.status).toBe(500);
+  });
+  test("testing using chace", async () => {
+    jest
+      .spyOn(redis, "get")
+      .mockImplementationOnce(() => Promise.resolve(JSON.stringify([])));
+    const response = await request(app)
+      .get("/orders")
+      .set("access_token", access_token);
+    // console.log(response.status);
+    expect(response.status).toBe(200);
+    expect(response.body).toBeInstanceOf(Object);
+  });
   test("testing create Order if success", async () => {
     const response = await request(app)
       .post("/orders")
@@ -279,6 +298,34 @@ describe("test table Orders", () => {
     expect(response.status).toBe(404);
     expect(response.body).toHaveProperty("msg", "Order Not Found");
   });
+  // test.only("testing raja ongkir destination if success", async () => {
+  //   const destination = {
+  //     rajaongkir: {
+  //       query: [],
+  //       status: {
+  //         code: 200,
+  //         description: "OK",
+  //       },
+  //       results: [
+  //         {
+  //           city_id: "1",
+  //           province_id: "21",
+  //           province: "Nanggroe Aceh Darussalam (NAD)",
+  //           type: "Kabupaten",
+  //           city_name: "Aceh Barat",
+  //           postal_code: "23681",
+  //         },
+  //       ],
+  //     },
+  //   };
+  //   const resp = { data: {} };
+  //   axios.get.mockResolvedValue({ data: {} });
+  //   const response = await request(app)
+  //     .get("/orders/city")
+  //     .set("access_token", access_token);
+  //   expect(response.status).toBe(200);
+  //   expect(response.body).toBeInstanceOf(Object);
+  // });
 });
 afterAll(async () => {
   await queryInterface.bulkDelete("Categories", null, {
