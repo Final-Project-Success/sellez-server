@@ -6,6 +6,6 @@ router
   .post("/login", Controller.login)
   .post("/register", Controller.register)
   .post("/login-oauth", Controller.oauthLogin)
-  .get("/verification", authentication, Controller.verificationEmail);
+  .get("/otp", authentication, Controller.getOTP);
 
 module.exports = router;
