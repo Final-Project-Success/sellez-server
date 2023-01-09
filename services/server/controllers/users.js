@@ -60,6 +60,31 @@ class Controller {
       next(err);
     }
   }
+  static async oauthRegister(req, res, next) {
+    try {
+      const { email } = req.body;
+      const [user, created] = await User.findOrCreate({
+        where: { email },
+        defaults: {
+          username: "oauth",
+          email,
+          password: "oauth",
+          address: "oauth",
+          profilePict: "oauth",
+          role: "customer",
+          phoneNumber: "oauth",
+        },
+      });
+
+      res.status(201).json({
+        id: user.id,
+        email: user.email,
+        msg: "Register Success!",
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
 }
 
 module.exports = Controller;
