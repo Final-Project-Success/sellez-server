@@ -36,7 +36,7 @@ class Controller {
   static async login(req, res, next) {
     try {
       const { email, password } = req.body;
-
+      console.log(req.body);
       if (!email || !password) {
         throw {
           name: "Error email or password",
@@ -60,18 +60,26 @@ class Controller {
       next(err);
     }
   }
-  static async findUser(req, res, next) {
+  static async oauthLogin(req, res, next) {
     try {
-      const { id } = req.params;
-      const findUser = await User.findByPk(id);
+      const { email } = req.body;
+      const [user, created] = await User.findOrCreate({
+        where: { email },
+        defaults: {
+          username: "oauth",
+          email,
+          password: "oauth",
+          address: "oauth",
+          profilePict: "oauth",
+          role: "customer",
+          phoneNumber: "oauth",
+        },
+        hooks: false,
+      });
 
-      if (!findUser) {
-        throw {
-          name: "User Not Found",
-        };
-      }
+      const access_token = jwtSign({ id: user ? user.id : created.id });
 
-      res.status(200).json(findUser);
+      res.status(200).json({ access_token, msg: "Login Success" });
     } catch (err) {
       next(err);
     }

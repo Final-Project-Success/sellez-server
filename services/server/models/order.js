@@ -13,18 +13,6 @@ module.exports = (sequelize, DataTypes) => {
   }
   Order.init(
     {
-      name: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-          notNull: {
-            msg: "Name is required",
-          },
-          notEmpty: {
-            msg: "Name is required",
-          },
-        },
-      },
       totalPrice: {
         type: DataTypes.INTEGER,
         allowNull: false,

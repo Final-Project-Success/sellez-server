@@ -10,11 +10,11 @@ const i = new Invoice(invoiceSpecificOptions);
 class Controller {
   static async addOrders(req, res, next) {
     try {
-      const { name, totalPrice, UserId, shippingCost } = req.body;
+      const { totalPrice, shippingCost } = req.body;
+
       const newOrder = await Order.create({
-        name,
         totalPrice,
-        UserId,
+        UserId: req.User.id,
         shippingCost,
         status: false,
       });
@@ -43,6 +43,9 @@ class Controller {
           },
         ],
       });
+
+      await redis.del("sellez-orders");
+
       res.status(200).json(createdInvoice);
     } catch (err) {
       next(err);
@@ -50,7 +53,16 @@ class Controller {
   }
   static async readAllOrders(req, res, next) {
     try {
+      const chaceData = await redis.get("sellez-orders");
+
+      if (chaceData) {
+        return res.status(200).json(JSON.parse(chaceData));
+      }
+
       const orders = await Order.findAll();
+
+      await redis.set("sellez-orders", JSON.stringify(orders));
+
       res.status(200).json(orders);
     } catch (err) {
       next(err);
@@ -67,6 +79,33 @@ class Controller {
         };
       }
       res.status(200).json(order);
+    } catch (err) {
+      next(err);
+    }
+  }
+  static async checkOutOrder(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { totalPrice, shippingCost } = req.body;
+      const order = await Order.findByPk(id);
+
+      if (!order) {
+        throw {
+          name: "Order Not Found",
+        };
+      }
+
+      await Order.update(
+        {
+          totalPrice,
+          shippingCost,
+        },
+        { where: { id, status: false } }
+      );
+
+      await redis.del("sellez-orders");
+
+      res.status(200).json({ msg: "Success to order" });
     } catch (err) {
       next(err);
     }
@@ -106,12 +145,63 @@ class Controller {
       }
 
       await Order.update({ status: true }, { where: { id } });
+      await redis.del("sellez-orders");
 
       res.status(200).json({
         msg: "Order already paid",
       });
     } catch (err) {
       next(err);
+    }
+  }
+  static async destination(req, res, next) {
+    try {
+      const { data } = await axios({
+        method: `GET`,
+        url: `https://api.rajaongkir.com/starter/city`,
+        headers: {
+          key: process.env.RAJA_ONGKIR,
+        },
+      });
+      res.status(200).json(data);
+    } catch (error) {
+      next(error);
+    }
+  }
+  static async cost(req, res, next) {
+    try {
+      // console.log("object");
+      const { origin, destination, weight, courier } = req.body;
+      const { data } = await axios({
+        method: `POST`,
+        url: `https://api.rajaongkir.com/starter/cost`,
+        headers: {
+          key: process.env.RAJA_ONGKIR,
+        },
+        data: {
+          origin,
+          destination,
+          weight,
+          courier,
+        },
+      });
+
+      // let response = {
+      //   originType: data.rajaongkir.origin_details.type,
+      //   originName: data.rajaongkir.origin_details.city_name,
+      //   destinationType: data.rajaongkir.destination_details.type,
+      //   destinationName: data.rajaongkir.destination_details.city_name,
+      //   courier: data.rajaongkir.results[0].name,
+      //   services: data.rajaongkir.results[0].costs.map((cost) => {
+      //     return cost;
+      //   }),
+      //   // price: data.rajaongkir.results[0].costs[0].cost[0].value,
+      // };
+
+      res.status(200).json(data.rajaongkir);
+    } catch (error) {
+      res.status(500).json(error);
+      next(error);
     }
   }
 }

@@ -1,9 +1,21 @@
-const { Product } = require("../models/index");
+const { Product, Image, Category, sequelize } = require("../models/index");
+const redis = require("../config/connectRedis");
 
 class Controller {
   static async getProduct(req, res, next) {
     try {
-      const dataProduct = await Product.findAll();
+      const chaceData = await redis.get("sellez-products");
+
+      if (chaceData) {
+        return res.status(200).json(JSON.parse(chaceData));
+      }
+
+      const dataProduct = await Product.findAll({
+        include: Category,
+      });
+
+      await redis.set("sellez-products", JSON.stringify(dataProduct));
+
       res.status(200).json(dataProduct);
     } catch (err) {
       next(err);
@@ -11,19 +23,35 @@ class Controller {
   }
   static async postProduct(req, res, next) {
     try {
-      const { name, price, description, imgUrl, stock, CategoryId, color } =
-        req.body;
-      const product = await Product.create({
-        name,
-        price,
-        description,
-        imgUrl,
-        stock,
-        CategoryId,
-        color,
+      const images = req.files;
+      const { name, price, description, stock, CategoryId, color } = req.body;
+      const result = await sequelize.transaction(async (t) => {
+        const product = await Product.create(
+          {
+            name,
+            price,
+            description,
+            imgUrl: images[0].path,
+            stock,
+            CategoryId,
+            color,
+          },
+          { transaction: t }
+        );
+
+        const data = images.map((el) => {
+          return { imgUrl: el.path, ProductId: product.id };
+        });
+
+        const newImages = await Image.bulkCreate(data, { transaction: t });
+        const newData = { ...product, Images: newImages };
+
+        return newData;
       });
 
-      res.status(201).json(product);
+      await redis.del("sellez-products");
+
+      res.status(201).json(result);
     } catch (err) {
       next(err);
     }
@@ -31,7 +59,9 @@ class Controller {
   static async getDetailProduct(req, res, next) {
     try {
       const { id } = req.params;
-      const productById = await Product.findByPk(id);
+      const productById = await Product.findByPk(id, {
+        include: [{ model: Image }, { model: Category }],
+      });
 
       if (!productById) {
         throw {
@@ -74,8 +104,10 @@ class Controller {
         }
       );
 
+      await redis.del("sellez-products");
+
       res.status(200).json({
-        message: `Product with name ${productById.name} has been updated`,
+        msg: `Product with name ${productById.name} has been updated`,
       });
     } catch (err) {
       next(err);
@@ -98,8 +130,10 @@ class Controller {
         },
       });
 
+      await redis.del("sellez-products");
+
       res.status(200).json({
-        message: `Product with name ${productById.name} has been deleted`,
+        msg: `Product with name ${productById.name} has been deleted`,
       });
     } catch (err) {
       next(err);

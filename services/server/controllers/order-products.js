@@ -1,24 +1,37 @@
 const { OrderProduct } = require("../models");
+const redis = require("../config/connectRedis");
 
 class Controller {
   static async postOrderProduct(req, res, next) {
     try {
-      const { ProductId, OrderId, quantity, subTotal } = req.body;
-      const newOrderProducts = await OrderProduct.create({
+      const { ProductId, quantity, price } = req.body;
+      const { OrderId } = req.Order;
+      const newOrderProduct = await OrderProduct.create({
         ProductId,
         OrderId,
         quantity,
-        subTotal,
+        price,
+        subTotal: price * quantity,
       });
 
-      res.status(201).json(newOrderProducts);
+      await redis.del("sellez-orderProducts");
+
+      res.status(201).json(newOrderProduct);
     } catch (err) {
       next(err);
     }
   }
   static async getOrderProduct(req, res, next) {
     try {
+      const chaceData = await redis.get("sellez-orderProducts");
+
+      if (chaceData) {
+        return res.status(200).json(JSON.parse(chaceData));
+      }
+
       const orderProducts = await OrderProduct.findAll();
+
+      await redis.set("sellez-orderProducts", JSON.stringify(orderProducts));
 
       res.status(200).json(orderProducts);
     } catch (err) {
@@ -37,30 +50,6 @@ class Controller {
       }
 
       res.status(200).json(orderProductsByProduct);
-    } catch (err) {
-      next(err);
-    }
-  }
-  static async deleteOrderProduct(req, res, next) {
-    try {
-      const { id } = req.params;
-      const orderProductsByProduct = await OrderProduct.findByPk(id);
-
-      if (!orderProductsByProduct) {
-        throw {
-          name: "OrderProduct Not Found",
-        };
-      }
-
-      await OrderProduct.destroy({
-        where: {
-          id,
-        },
-      });
-
-      res.status(200).json({
-        message: `OrderProducts has been deleted`,
-      });
     } catch (err) {
       next(err);
     }

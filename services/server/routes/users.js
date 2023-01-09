@@ -5,6 +5,6 @@ const router = require("express").Router();
 router
   .post("/login", Controller.login)
   .post("/register", Controller.register)
-  .get("/:id", Controller.findUser);
+  .post("/login-oauth", Controller.oauthLogin);
 
 module.exports = router;
