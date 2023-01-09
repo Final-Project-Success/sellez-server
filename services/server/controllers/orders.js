@@ -84,9 +84,32 @@ class Controller {
         { where: { id, status: false } }
       );
 
+      let idPayout = "invoice-sellez-id-" + new Date().getTime().toString(); //
+      let invoice = await i.createInvoice({
+        externalID: idPayout,
+        payerEmail: order.User.email,
+        description: `Invoice for ${idPayout}`,
+        amount: totalPrice,
+        items: [
+          {
+            name: "Air Conditioner",
+            quantity: 1,
+            price: 100000,
+            category: "Electronic",
+            url: "https://yourcompany.com/example_item",
+          },
+        ],
+        fees: [
+          {
+            type: "Handling Fee",
+            value: shippingCost,
+          },
+        ],
+      });
+
       await redis.del("sellez-orders");
 
-      res.status(200).json({ msg: "Success to order" });
+      res.status(200).json({ msg: "Success to order", invoice: invoice });
     } catch (err) {
       next(err);
     }
