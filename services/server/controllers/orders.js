@@ -1,6 +1,16 @@
-const { Order } = require("../models");
+const { Order, User } = require("../models");
 const redis = require("../config/connectRedis");
 const axios = require("axios");
+const Xendit = require("xendit-node");
+const x = new Xendit({
+  secretKey: process.env.API_XENDIT,
+});
+
+const { Invoice, Payout } = x;
+const invoiceSpecificOptions = {};
+const payoutSpecificOptions = {};
+const i = new Invoice(invoiceSpecificOptions);
+const p = new Payout(payoutSpecificOptions);
 
 class Controller {
   static async addOrders(req, res, next) {
@@ -65,17 +75,41 @@ class Controller {
         };
       }
 
+      let idPayout = "invoice-sellez-id-" + new Date().getTime().toString(); //
+      let invoice = await i.createInvoice({
+        externalID: idPayout,
+        payerEmail: order.User.email,
+        description: `Invoice for ${idPayout}`,
+        amount: totalPrice,
+        items: [
+          {
+            name: "Air Conditioner",
+            quantity: 1,
+            price: 100000,
+            category: "Electronic",
+            url: "https://yourcompany.com/example_item",
+          },
+        ],
+        fees: [
+          {
+            type: "Handling Fee",
+            value: shippingCost,
+          },
+        ],
+      });
+
       await Order.update(
         {
           totalPrice,
           shippingCost,
+          invoice: invoice.id,
         },
         { where: { id, status: false } }
       );
 
       await redis.del("sellez-orders");
 
-      res.status(200).json({ msg: "Success to order" });
+      res.status(200).json({ msg: "Success to order", invoice: invoice });
     } catch (err) {
       next(err);
     }
@@ -83,7 +117,7 @@ class Controller {
   static async updateStatusOrder(req, res, next) {
     try {
       const { id } = req.params;
-      const order = await Order.findByPk(id);
+      const order = await Order.findOne({ where: { invoice: req.body.id } });
 
       if (!order) {
         throw {
@@ -91,8 +125,10 @@ class Controller {
         };
       }
 
-      await Order.update({ status: true }, { where: { id } });
+      await Order.update({ status: true }, { where: { invoice: req.body.id } });
       await redis.del("sellez-orders");
+
+      console.log("Order paid");
 
       res.status(200).json({
         msg: "Order already paid",

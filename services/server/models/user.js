@@ -106,5 +106,9 @@ module.exports = (sequelize, DataTypes) => {
       },
     }
   );
+  User.beforeCreate(async (user) => {
+    user.verified = false;
+  });
+
   return User;
 };
