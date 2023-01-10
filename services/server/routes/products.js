@@ -20,7 +20,7 @@ const storage = new CloudinaryStorage({
 
 const upload = multer({ storage: storage });
 
-router.post("/", upload.array("imgUrl", 5), Controller.postProduct)
+router.post("/", upload.array("imgUrl"), Controller.postProduct)
 // console.log('masok router');
 router
   .get("/", Controller.getProduct)
