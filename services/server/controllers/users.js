@@ -97,6 +97,7 @@ class Controller {
   static async oauthLogin(req, res, next) {
     try {
       const { email, username } = req.body;
+
       const [user, created] = await User.findOrCreate({
         where: { email },
         defaults: {
@@ -106,6 +107,7 @@ class Controller {
           address: "oauth",
           role: "customer",
           phoneNumber: "oauth",
+          verified: true,
         },
         hooks: false,
       });
@@ -123,7 +125,19 @@ class Controller {
       next(err);
     }
   }
-  static async verifyAccount(req, res, next) {
+  static async getUsers(req, res, next) {
+    try {
+      const users = await User.findAll({
+        attributes: {
+          exclude: ["password", "createdAt", "updatedAt"],
+        },
+      });
+      res.json(users);
+    } catch (error) {
+      next(error);
+    }
+  }
+  static async verificationEmail(req, res, next) {
     try {
       let { otp } = req.body;
       if (!otp) {

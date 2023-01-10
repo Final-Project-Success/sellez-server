@@ -24,6 +24,7 @@ class Controller {
   static async postProduct(req, res, next) {
     try {
       const images = req.files;
+
       const { name, price, description, stock, CategoryId, color } = req.body;
       const result = await sequelize.transaction(async (t) => {
         const product = await Product.create(
