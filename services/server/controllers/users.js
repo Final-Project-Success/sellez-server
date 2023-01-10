@@ -1,6 +1,8 @@
 const { comparePassword } = require("../helpers/bcrypt");
 const { jwtSign } = require("../helpers/jwt");
-const { User } = require("../models");
+const { User, otp } = require("../models");
+const otpGenerator = require("otp-generator");
+const nodemailer = require("nodemailer");
 
 class Controller {
   static async register(req, res, next) {
@@ -24,7 +26,13 @@ class Controller {
         phoneNumber,
       });
 
-      let otp = otpGenerator.generate(10, {});
+      let createdOTP = otpGenerator.generate(10, {});
+      console.log(createdOTP);
+
+      const registerOTP = await otp.create({
+        idUser: newUser.id,
+        otp: createdOTP,
+      });
 
       const transporter = nodemailer.createTransport({
         host: "smtp.gmail.com",
@@ -41,7 +49,7 @@ class Controller {
         to: email,
         subject: "Activation code",
         html: `<h1>Hai </h1>
-          <p>Udah ga sabar kan buat belanja belanja di SellEz? Berikut Activation code kamu : ${otp}</p>`,
+          <p>Udah ga sabar kan buat belanja belanja di SellEz? Berikut Activation code kamu : ${createdOTP}</p>`,
       };
 
       transporter.sendMail(mailOptions, function (error, info) {
@@ -55,7 +63,7 @@ class Controller {
       res.status(201).json({
         id: newUser.id,
         email: newUser.email,
-        msg: "Register Success! Open Your Email to Activate Your Account",
+        msg: "Register Success! Open Your Email to get Your Activation Code  ",
       });
     } catch (err) {
       next(err);
@@ -112,7 +120,12 @@ class Controller {
       next(err);
     }
   }
-  static async verifyAccount(req, res, next) {}
+  static async verifyAccount(req, res, next) {
+    try {
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = Controller;

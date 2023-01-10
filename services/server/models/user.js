@@ -102,13 +102,11 @@ module.exports = (sequelize, DataTypes) => {
       hooks: {
         beforeCreate(user) {
           user.password = hashPassword(user.password);
+          user.verified = false;
         },
       },
     }
   );
-  User.beforeCreate(async (user) => {
-    user.verified = false;
-  });
 
   return User;
 };
