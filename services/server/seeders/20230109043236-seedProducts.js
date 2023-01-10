@@ -13,7 +13,7 @@ module.exports = {
           imgUrl: "https://res.cloudinary.com/dqschoc1m/image/upload/v1673246003/JKT48/wyjml9nknykhrnh21l3r.png",
           stock: 200,
           CategoryId: 1,
-          color: "white",
+          color: "from-violet-500 to-indigo-500",
         },
         {
           name: "Air Jordan 4 Retro PS 'Military Black'",
@@ -22,16 +22,16 @@ module.exports = {
           imgUrl:"https://res.cloudinary.com/dqschoc1m/image/upload/v1673248156/JKT48/ugimwwimrzdqou3mbkyn.png",
           stock: 88,
           CategoryId: 1,
-          color: "white",
+          color: "from-sky-600 to-indigo-600",
         },
         {
           name: "Wmns Air Jordan 1 Low SE 'Homage'",
           price: 1700000,
           description: "The women’s Air Jordan 1 Low SE ‘Homage’ showcases split color blocking that recalls the ‘Homage to Home’ Air Jordan 1 High from 2018. The tumbled leather upper on each shoe features a white base with contrasting black overlays on the lateral side, and a black base with white overlays on the medial side. The split theme extends to the Jumpman tongue tag and the Wings logo embroidered on the heel. Both shoes are mounted on a rubber cupsole, highlighted by white sidewalls and a black rubber outsole.",
-          imgUrl: "https://res.cloudinary.com/dqschoc1m/image/upload/v1673248653/JKT48/mitx4ryfqwqhtddvlds0.png",
+          imgUrl:"https://res.cloudinary.com/dqschoc1m/image/upload/v1673263399/JKT48/kvuviz4ewh1d0zjegrwd.png",
           stock: 45,
           CategoryId: 1,
-          color: "white",
+          color: "from-green-500 to-emerald-500",
         },
         {
           name: "Dunk Low SB 'Sandy Bodecker'",
@@ -40,7 +40,7 @@ module.exports = {
           imgUrl: "https://res.cloudinary.com/dqschoc1m/image/upload/v1673259723/JKT48/lsvw0yq6g8gy7vq98gpc.png",
           stock: 169,
           CategoryId: 1,
-          color: "white",
+          color: "from-red-500 to-rose-500",
         },
         {
           name: "Dunk Low Pro SB 'Bart Simpson'",
@@ -49,7 +49,7 @@ module.exports = {
           imgUrl: "https://res.cloudinary.com/dqschoc1m/image/upload/v1673250307/JKT48/fac8euaaw8mufbqctfly.png",
           stock: 76,
           CategoryId: 1,
-          color: "yellow",
+          color: "from-orange-500 to-amber-500",
         },
         {
           name: "Salehe Bembury x 990v2 Made in USA 'Sand Be The Time'",
@@ -58,7 +58,7 @@ module.exports = {
           imgUrl: "https://res.cloudinary.com/dqschoc1m/image/upload/v1673253263/JKT48/ps51g5nhggzfqmzhmetf.png",
           stock: 13,
           CategoryId: 1,
-          color: "pink",
+          color: "from-red-500 to-rose-500",
         },
         {
           name: "Teddy Santis x 990v3 Made in USA 'White Blue'",
@@ -67,7 +67,7 @@ module.exports = {
           imgUrl: "https://res.cloudinary.com/dqschoc1m/image/upload/v1673256936/JKT48/qghjpe2be6jb4cx4grxp.png",
           stock: 24,
           CategoryId: 1,
-          color: "cream",
+          color: "from-gray-900 to-yellow-500",
         },
         {
           name: "Yeezy Boost 350 V2 'Beluga Reflective'",
@@ -76,7 +76,7 @@ module.exports = {
           imgUrl:"https://res.cloudinary.com/dqschoc1m/image/upload/v1673257547/JKT48/x0spec1i67ajlv19kvkc.png",
           stock: 211,
           CategoryId: 1,
-          color: "grey",
+          color: "from-gray-900 to-yellow-500",
         },
         {
           name: "Travis Scott x Air Jordan 1 Low OG 'Reverse Mocha'c",
@@ -85,7 +85,7 @@ module.exports = {
           imgUrl:"https://res.cloudinary.com/dqschoc1m/image/upload/v1673258324/JKT48/zqlce61brsbxaxyafwye.png",
           stock: 16,
           CategoryId: 1,
-          color: "grey",
+          color: "from-gray-900 to-yellow-500",
         },
         {
           name: "Yeezy Boost 350 V2 'Flax'",
@@ -94,7 +94,7 @@ module.exports = {
           imgUrl: "https://res.cloudinary.com/dqschoc1m/image/upload/v1673259207/JKT48/qgywzjg3l8ki0lwapbfs.png",
           stock: 242,
           CategoryId: 1,
-          color: "grey",
+          color: "from-gray-900 to-yellow-500",
         }
       ],
       {}
