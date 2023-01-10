@@ -16,7 +16,6 @@ class Controller {
   static async addOrders(req, res, next) {
     try {
       const { totalPrice, shippingCost, products } = req.body;
-      console.log(req.body);
 
       const result = await sequelize.transaction(async (t) => {
         const newOrder = await Order.create(
