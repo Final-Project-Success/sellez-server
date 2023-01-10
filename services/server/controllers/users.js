@@ -7,23 +7,16 @@ const nodemailer = require("nodemailer");
 class Controller {
   static async register(req, res, next) {
     try {
-
-      const pict  = req.file.path 
+      const pict = req.file.path;
       console.log(req.file);
-      const {
-        username,
-        email,
-        password,
-        address,
-        role,
-        phoneNumber,
-      } = req.body;
+      const { username, email, password, address, role, phoneNumber } =
+        req.body;
       const newUser = await User.create({
         username,
         email,
         password,
         address,
-        profilePict: pict, 
+        profilePict: pict,
         role,
         phoneNumber,
       });
@@ -125,6 +118,7 @@ class Controller {
       res.status(200).json({
         access_token,
         role: user ? user.role : created.role,
+        username: user ? user.username : created.username,
         msg: "Login Success",
       });
     } catch (err) {
