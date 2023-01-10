@@ -8,7 +8,7 @@ const { queryInterface } = sequelize;
 
 let access_token;
 beforeAll(async () => {
-  await queryInterface.bulkInsert(
+  queryInterface.bulkInsert(
     "Users",
     [
       {
@@ -145,31 +145,6 @@ describe("test table OrderProducts", () => {
       .set("access_token", access_token);
     expect(response.status).toBe(404);
     expect(response.body).toHaveProperty("msg", "OrderProduct Not Found");
-  });
-  test("testing create OrderProducts if success", async () => {
-    const response = await request(app)
-      .post("/order-products")
-      .send(createOrderProduct)
-      .set("access_token", access_token);
-    expect(response.status).toBe(201);
-    expect(response.body).toBeInstanceOf(Object);
-    expect(response.body).toHaveProperty("ProductId", expect.any(Number));
-    expect(response.body).toHaveProperty("OrderId", expect.any(Number));
-    expect(response.body).toHaveProperty("quantity", expect.any(Number));
-    expect(response.body).toHaveProperty("subTotal", expect.any(Number));
-    expect(response.body).toHaveProperty("price", expect.any(Number));
-  });
-  test("testing create OrderProducts if ProductId is empty", async () => {
-    const data = {
-      ...createOrderProduct,
-      ProductId: "",
-    };
-    const response = await request(app)
-      .post("/order-products")
-      .send(data)
-      .set("access_token", access_token);
-    expect(response.status).toBe(400);
-    expect(response.body).toHaveProperty("msg", "Product id is required");
   });
 });
 

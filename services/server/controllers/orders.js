@@ -159,16 +159,17 @@ class Controller {
   }
   static async destination(req, res, next) {
     try {
-      const data = await axios({
-        method: `GET`,
-        url: `https://api.rajaongkir.com/starter/city`,
-        headers: {
-          key: process.env.RAJA_ONGKIR,
-        },
-      });
-      res.status(200).json(data.data);
+      const { data } = await axios.get(
+        `https://api.rajaongkir.com/starter/city`,
+        {
+          headers: {
+            key: process.env.RAJA_ONGKIR,
+          },
+        }
+      );
+      console.log("masuuuukkkk siniii");
+      res.status(200).json(data);
     } catch (error) {
-      console.log(error, "<><><><><>><> TETSTSTTS");
       next(error);
     }
   }
@@ -176,19 +177,20 @@ class Controller {
     try {
       // console.log("object");
       const { origin, destination, weight, courier } = req.body;
-      const { data } = await axios({
-        method: `POST`,
-        url: `https://api.rajaongkir.com/starter/cost`,
-        headers: {
-          key: process.env.RAJA_ONGKIR,
-        },
-        data: {
-          origin,
-          destination,
-          weight,
-          courier,
-        },
-      });
+      const { data } = await axios.post(
+        `https://api.rajaongkir.com/starter/cost`,
+        {
+          headers: {
+            key: process.env.RAJA_ONGKIR,
+          },
+          data: {
+            origin,
+            destination,
+            weight,
+            courier,
+          },
+        }
+      );
 
       // let response = {
       //   originType: data.rajaongkir.origin_details.type,
@@ -204,7 +206,6 @@ class Controller {
 
       res.status(200).json(data.rajaongkir);
     } catch (error) {
-      console.log(error, "<><><<><><><><><><><><><><");
       next(error);
     }
   }
