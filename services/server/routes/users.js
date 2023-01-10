@@ -25,6 +25,12 @@ router
   .post("/login", Controller.login)
   .post("/register", Controller.register)
   .post("/login-oauth", Controller.oauthLogin)
+<<<<<<< HEAD
+  .get("/user", Controller.getUsers)
+  .get("/verification", authentication, Controller.verificationEmail);
+=======
   .patch("/activations", authentication, Controller.verifyAccount);
+>>>>>>> a2a528466585ea3e3cec91cacc0ad921f65ebe22
+
 
 module.exports = router;

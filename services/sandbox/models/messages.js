@@ -9,4 +9,22 @@ const messagesSchema = new mongoose.Schema(
 );
 const Message = mongoose.model("Message", messagesSchema);
 
-module.exports = Message;
+const msgPrivateSchema = new mongoose.Schema(
+  {
+    // message: String,
+    // author: String,
+    // room: Number,
+    // time: String
+    privatemsg: {
+      room: Number,
+      message :{
+        user:String,
+        message: String,
+        time: String
+      }
+    }
+  },
+);
+const MessagePrivate = mongoose.model("MessagePrivate", msgPrivateSchema);
+
+module.exports = {Message, MessagePrivate};

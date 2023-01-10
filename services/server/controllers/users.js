@@ -125,7 +125,23 @@ class Controller {
       next(err);
     }
   }
+<<<<<<< HEAD
+  static async getUsers(req,res,next){
+    try {
+      const users = await User.findAll({
+       attributes:{
+        exclude: ['password', 'createdAt', 'updatedAt']
+       }
+      })
+      res.json(users)
+    } catch (error) {
+      next(error)
+    }
+  }
+  static async verificationEmail(req, res, next) {
+=======
   static async verifyAccount(req, res, next) {
+>>>>>>> a2a528466585ea3e3cec91cacc0ad921f65ebe22
     try {
       let { otp } = req.body;
       if (!otp) {
