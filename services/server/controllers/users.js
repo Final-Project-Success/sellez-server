@@ -5,12 +5,14 @@ const { User } = require("../models");
 class Controller {
   static async register(req, res, next) {
     try {
+
+      const { pict } = req.file.path 
+
       const {
         username,
         email,
         password,
         address,
-        profilePict,
         role,
         phoneNumber,
       } = req.body;
@@ -19,7 +21,7 @@ class Controller {
         email,
         password,
         address,
-        profilePict,
+        profilePict: pict, 
         role,
         phoneNumber,
       });
