@@ -68,18 +68,6 @@ module.exports = (sequelize, DataTypes) => {
           },
         },
       },
-      profilePict: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-          notNull: {
-            msg: "Profile pict is required",
-          },
-          notEmpty: {
-            msg: "Profile pict is required",
-          },
-        },
-      },
       role: {
         type: DataTypes.STRING,
       },
