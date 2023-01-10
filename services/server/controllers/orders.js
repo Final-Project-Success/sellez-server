@@ -1,4 +1,4 @@
-const { Order, OrderProduct, Product, sequelize } = require("../models");
+const { Order, OrderProduct, Product, User, sequelize } = require("../models");
 
 const redis = require("../config/connectRedis");
 const axios = require("axios");
