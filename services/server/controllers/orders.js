@@ -58,7 +58,9 @@ class Controller {
         return res.status(200).json(JSON.parse(chaceData));
       }
 
-      const orders = await Order.findAll({ include: User });
+      const orders = await Order.findAll({
+        include: [{ model: User }, { model: OrderProduct }],
+      });
 
       await redis.set("sellez-orders", JSON.stringify(orders));
 
