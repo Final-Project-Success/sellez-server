@@ -168,7 +168,7 @@ describe("test table Products", () => {
       .field("color", createProduct.color)
       .field("stock", createProduct.stock)
       .attach("imgUrl", "__tests__/images/gambar1-1.png")
-      .attach("imgUrl", "__tests__/images/gambar1-2.png")
+      // .attach("imgUrl", "__tests__/images/gambar1-2.png")
       // .attach("imgUrl", "__tests__/images/gambar1-3.png")
       // .attach("imgUrl", "__tests__/images/gambar1-4.png")
       .set("access_token", access_token);

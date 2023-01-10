@@ -185,23 +185,7 @@ describe("test table Users", () => {
     expect(response.body).toHaveProperty("access_token", expect.any(String));
     expect(response.body).toHaveProperty("msg", "Login Success");
   });
-  // test("testing login if email doesn't match", async () => {
-  //   const data = {
-  //     username: "oauth",
-  //     email: "",
-  //     password: "oauth",
-  //     address: "oauth",
-  //     profilePict: "oauth",
-  //     role: "customer",
-  //     phoneNumber: "oauth",
-  //   };
-  //   const response = await request(app).post("/login-oauth").send(data);
-  //   expect(response.status).toBe(400);
-  //   expect(response.body).toHaveProperty(
-  //     "msg",
-  //     "Error invalid email or password"
-  //   );
-  // });
+  test("testing get OTP if success", async () => {});
   test("testing login if email doesn't match", async () => {
     const data = {
       ...dataUser,

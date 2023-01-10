@@ -1,13 +1,14 @@
 const app = require("../app");
 const axios = require("axios");
 const request = require("supertest");
-const { sequelize, Order } = require("../models");
+const { sequelize, Order, Product } = require("../models");
 const { hashPassword } = require("../helpers/bcrypt");
 const { jwtSign } = require("../helpers/jwt");
 const redis = require("../config/connectRedis");
 const { text } = require("express");
 const { queryInterface } = sequelize;
 
+let product = [];
 let access_token;
 jest.mock("axios");
 beforeAll(async () => {
@@ -37,29 +38,17 @@ beforeAll(async () => {
     ],
     {}
   );
-  await queryInterface.bulkInsert(
-    "Products",
-    [
-      {
-        name: "Air Jordan 1 Bred Patent",
-        price: 8000000,
-        description:
-          "The Air Jordan 1 Retro High OG 'Patent Bred' treats the iconic colorway to a glossy makeover. Aside from the shoe's patent leather construction, the essential design DNA remains intact. The upper pairs basic black paneling with contrasting hits of Varsity Red on the toe box, Swoosh, heel overlay and collar flap. A woven Nike tag adorns the black nylon tongue, while a Wings logo is stamped on the lateral collar. The high-top rides on a sturdy rubber cupsole, enhanced with an Air-sole unit encapsulated in lightweight polyurethane.",
-        imgUrl:
-          "https://cdn.shopify.com/s/files/1/0516/0760/1336/products/Voila_1_f179f0c5-9c5e-43a6-9fe6-b5a252f55f5b_1000x.jpg?v=1642647113",
-        stock: 20,
-        CategoryId: 1,
-        color: "red",
-      },
-    ],
-    {}
-  );
-  queryInterface.bulkInsert("Orders", [
+  product = await Product.bulkCreate([
     {
-      totalPrice: 100000,
-      UserId: 1,
-      shippingCost: 20000,
-      status: false,
+      name: "Air Jordan 1 Bred Patent",
+      price: 8000000,
+      description:
+        "The Air Jordan 1 Retro High OG 'Patent Bred' treats the iconic colorway to a glossy makeover. Aside from the shoe's patent leather construction, the essential design DNA remains intact. The upper pairs basic black paneling with contrasting hits of Varsity Red on the toe box, Swoosh, heel overlay and collar flap. A woven Nike tag adorns the black nylon tongue, while a Wings logo is stamped on the lateral collar. The high-top rides on a sturdy rubber cupsole, enhanced with an Air-sole unit encapsulated in lightweight polyurethane.",
+      imgUrl:
+        "https://cdn.shopify.com/s/files/1/0516/0760/1336/products/Voila_1_f179f0c5-9c5e-43a6-9fe6-b5a252f55f5b_1000x.jpg?v=1642647113",
+      stock: 20,
+      CategoryId: 1,
+      color: "red",
     },
   ]);
 });
@@ -70,9 +59,8 @@ beforeEach(() => {
 
 const createOrder = {
   totalPrice: 50000,
-  UserId: 1,
   shippingCost: 20000,
-  status: false,
+  products: product,
 };
 describe("test table Orders", () => {
   test("testing read Orders if User isn't logged in", async () => {
@@ -80,20 +68,20 @@ describe("test table Orders", () => {
     expect(response.status).toBe(401);
     expect(response.body).toHaveProperty("msg", "Please Login First");
   });
-  test.only("testing read Orders if success", async () => {
+  test("testing read Orders if success", async () => {
     const response = await request(app)
       .get("/orders")
       .set("access_token", access_token);
     expect(response.status).toBe(200);
-    // expect(response.body).toBeInstanceOf(Object);
-    // response.body.forEach((el) => {
-    //   expect(el).toHaveProperty("UserId", expect.any(Number));
-    //   expect(el).toHaveProperty("status", expect.any(Boolean));
-    //   expect(el).toHaveProperty("shippingCost", expect.any(Number));
-    //   expect(el).toHaveProperty("totalPrice", expect.any(Number));
-    //   expect(el).toHaveProperty("createdAt", expect.any(String));
-    //   expect(el).toHaveProperty("updatedAt", expect.any(String));
-    // });
+    expect(response.body).toBeInstanceOf(Object);
+    response.body.forEach((el) => {
+      expect(el).toHaveProperty("UserId", expect.any(Number));
+      expect(el).toHaveProperty("status", expect.any(Boolean));
+      expect(el).toHaveProperty("shippingCost", expect.any(Number));
+      expect(el).toHaveProperty("totalPrice", expect.any(Number));
+      expect(el).toHaveProperty("createdAt", expect.any(String));
+      expect(el).toHaveProperty("updatedAt", expect.any(String));
+    });
   });
   test("testing table read Orders if error", async () => {
     jest
@@ -202,11 +190,10 @@ describe("test table Orders", () => {
   test("testing edit Order by id if success", async () => {
     const data = {
       ...createOrder,
-      totalPrice: 70000,
-      shippingCost: 25000,
+      status: true,
     };
     const response = await request(app)
-      .put("/orders/2")
+      .put("/orders/1")
       .send(data)
       .set("access_token", access_token);
     expect(response.status).toBe(200);
@@ -279,7 +266,7 @@ describe("test table Orders", () => {
       status: true,
     };
     const response = await request(app)
-      .patch("/orders/2")
+      .patch("/orders/1")
       .send(data)
       .set("access_token", access_token);
     expect(response.status).toBe(200);
