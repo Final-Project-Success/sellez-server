@@ -1,9 +1,5 @@
-<<<<<<< HEAD
 const { Order, OrderProduct, Product, sequelize } = require("../models");
 
-=======
-const { Order, OrderProduct, User, sequelize } = require("../models");
->>>>>>> 4cff2598cd8bbdb5621dcaecf18d6f51c5842aeb
 const redis = require("../config/connectRedis");
 const axios = require("axios");
 const Xendit = require("xendit-node");
@@ -79,6 +75,8 @@ class Controller {
 
           let c = await OrderProduct.bulkCreate(data, { transaction: t });
           await t.commit();
+          await redis.del("sellez-orderProducts");
+          await redis.del("sellez-orders");
           res.status(200).json({ invoice_url: invoice.invoice_url });
           return newOrder;
         } catch (error) {
@@ -86,8 +84,6 @@ class Controller {
           await t.rollback();
         }
       });
-      // await redis.del("sellez-orderProducts");
-      // await redis.del("sellez-orders");
     } catch (err) {
       next(err);
     }
