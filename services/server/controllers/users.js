@@ -97,6 +97,7 @@ class Controller {
   static async oauthLogin(req, res, next) {
     try {
       const { email, username } = req.body;
+
       const [user, created] = await User.findOrCreate({
         where: { email },
         defaults: {
@@ -106,6 +107,7 @@ class Controller {
           address: "oauth",
           role: "customer",
           phoneNumber: "oauth",
+          verified: true,
         },
         hooks: false,
       });
