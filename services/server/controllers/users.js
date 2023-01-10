@@ -112,6 +112,7 @@ class Controller {
       next(err);
     }
   }
+  static async verifyAccount(req, res, next) {}
 }
 
 module.exports = Controller;

@@ -6,6 +6,7 @@ const router = require("express").Router();
 router
   .post("/login", Controller.login)
   .post("/register", Controller.register)
-  .post("/login-oauth", Controller.oauthLogin);
+  .post("/login-oauth", Controller.oauthLogin)
+  .patch("/activations", Controller.)
 
 module.exports = router;
