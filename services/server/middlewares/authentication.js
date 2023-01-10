@@ -43,7 +43,7 @@ module.exports = {
 
       const payload = jwtVerify(access_token);
       const user = await User.findByPk(payload.id);
-
+      console.log(user.role);
       if (!user || !user.role === "admin") {
         throw {
           name: "Unauthorized",
