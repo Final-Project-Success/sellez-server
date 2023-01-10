@@ -1,4 +1,5 @@
-const { Order, OrderProduct, User, sequelize } = require("../models");
+const { Order, OrderProduct, Product, sequelize } = require("../models");
+
 const redis = require("../config/connectRedis");
 const axios = require("axios");
 const Xendit = require("xendit-node");
@@ -16,36 +17,73 @@ class Controller {
   static async addOrders(req, res, next) {
     try {
       const { totalPrice, shippingCost, products } = req.body;
+      let p = JSON.parse(products);
+      let mapping = p.map((el) => {
+        return {
+          name: el.name,
+          quantity: el.cartQuantity,
+          price: el.price,
+          url: el.imgUrl,
+        };
+      });
 
       const result = await sequelize.transaction(async (t) => {
-        const newOrder = await Order.create(
-          {
-            totalPrice,
-            UserId: req.User.id,
-            shippingCost,
-            status: false,
-          },
-          { transaction: t }
-        );
+        try {
+          let idPayout = "invoice-sellez-id-" + new Date().getTime().toString(); //
+          let invoice = await i.createInvoice({
+            externalID: idPayout,
+            payerEmail: req.User.email,
+            description: `Invoice for ${idPayout}`,
+            amount: totalPrice,
+            items: mapping,
+            fees: [
+              {
+                type: "Handling Fee",
+                value: shippingCost,
+              },
+            ],
+          });
 
-        const data = products.map((el) => {
-          return {
-            ProductId: el.id,
-            OrderId: newOrder.id,
-            quantity: el.quantity,
-            price: el.price,
-            subTotal: el.price * el.quantity,
-          };
-        });
+          const newOrder = await Order.create(
+            {
+              totalPrice,
+              UserId: req.User.id,
+              shippingCost: shippingCost,
+              status: false,
+              invoice: invoice.id,
+            },
+            { transaction: t }
+          );
 
-        await OrderProduct.bulkCreate(data, { transaction: t });
+          const data = await p.map((el) => {
+            Product.decrement("stock", {
+              by: el.quantity,
+              where: { id: el.id },
+              transaction: t,
+            });
+            let totalzzz = el.price * el.quantity;
+            return {
+              ProductId: el.id,
+              OrderId: newOrder.id,
+              quantity: el.cartQuantity,
+              subTotal: el.price * el.cartQuantity,
+              price: el.price,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            };
+          });
 
-        return newOrder;
+          let c = await OrderProduct.bulkCreate(data, { transaction: t });
+          await t.commit();
+          await redis.del("sellez-orderProducts");
+          await redis.del("sellez-orders");
+          res.status(200).json({ invoice_url: invoice.invoice_url });
+          return newOrder;
+        } catch (error) {
+          console.log(error);
+          await t.rollback();
+        }
       });
-      await redis.del("sellez-orderProducts");
-      await redis.del("sellez-orders");
-
-      res.status(201).json(result);
     } catch (err) {
       console.log(err, "<><><><><><><><><><");
       next(err);
@@ -59,7 +97,9 @@ class Controller {
         return res.status(200).json(JSON.parse(chaceData));
       }
 
-      const orders = await Order.findAll({ include: User });
+      const orders = await Order.findAll({
+        include: [{ model: User }, { model: OrderProduct }],
+      });
 
       await redis.set("sellez-orders", JSON.stringify(orders));
 
@@ -128,7 +168,7 @@ class Controller {
       );
 
       await redis.del("sellez-orders");
-
+      console.log(invoice);
       res.status(200).json({ msg: "Success to order", invoice: invoice });
     } catch (err) {
       next(err);
@@ -136,7 +176,6 @@ class Controller {
   }
   static async updateStatusOrder(req, res, next) {
     try {
-      const { id } = req.params;
       const order = await Order.findOne({ where: { invoice: req.body.id } });
 
       if (!order) {

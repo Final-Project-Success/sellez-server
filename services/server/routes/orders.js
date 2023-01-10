@@ -9,6 +9,6 @@ router
   .get("/cost", Controller.cost)
   .get("/:id", Controller.readOneOrder)
   .put("/:id", Controller.checkOutOrder)
-  .post("/:id", Controller.updateStatusOrder);
+  .post("/paid", Controller.updateStatusOrder);
 
 module.exports = router;
