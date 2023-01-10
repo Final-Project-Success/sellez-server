@@ -6,8 +6,8 @@ class Controller {
   static async register(req, res, next) {
     try {
 
-      const { pict } = req.file.path 
-
+      const pict  = req.file.path 
+      console.log(req.file);
       const {
         username,
         email,
@@ -57,7 +57,12 @@ class Controller {
 
       const access_token = jwtSign({ id: findUser.id });
 
-      res.status(200).json({ access_token, msg: "Login Success!" });
+      res.status(200).json({
+        access_token,
+        username: findUser.username,
+        role: findUser.role,
+        msg: "Login Success!",
+      });
     } catch (err) {
       next(err);
     }
@@ -81,7 +86,11 @@ class Controller {
 
       const access_token = jwtSign({ id: user ? user.id : created.id });
 
-      res.status(200).json({ access_token, msg: "Login Success" });
+      res.status(200).json({
+        access_token,
+        role: user ? user.role : created.role,
+        msg: "Login Success",
+      });
     } catch (err) {
       next(err);
     }
