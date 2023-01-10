@@ -6,7 +6,7 @@ const { hashPassword } = require("../helpers/bcrypt");
 const redis = require("../config/connectRedis");
 const cloudinary = require("cloudinary").v2;
 const { queryInterface } = sequelize;
-jest.setTimeout(30000);
+jest.setTimeout(50000);
 
 let access_token;
 beforeAll(async () => {
@@ -166,7 +166,7 @@ describe("test table Products", () => {
       .field("color", createProduct.color)
       .field("stock", createProduct.stock)
       .attach("imgUrl", "__tests__/images/gambar1-1.png")
-      // .attach("imgUrl", "__tests__/images/gambar1-2.png")
+      .attach("imgUrl", "__tests__/images/gambar1-2.png")
       // .attach("imgUrl", "__tests__/images/gambar1-3.png")
       // .attach("imgUrl", "__tests__/images/gambar1-4.png")
       .set("access_token", access_token);
@@ -207,7 +207,7 @@ describe("test table Products", () => {
       .field("color", createProduct.color)
       .field("stock", createProduct.stock)
       .attach("imgUrl", "__tests__/images/gambar1-1.png")
-      .attach("imgUrl", "__tests__/images/gambar1-2.png")
+      // .attach("imgUrl", "__tests__/images/gambar1-2.png")
       .set("access_token", access_token);
     expect(response.status).toBe(400);
     expect(response.body).toHaveProperty("msg", "Name is required");
@@ -222,7 +222,7 @@ describe("test table Products", () => {
       .field("color", createProduct.color)
       .field("stock", createProduct.stock)
       .attach("imgUrl", "__tests__/images/gambar1-1.png")
-      .attach("imgUrl", "__tests__/images/gambar1-2.png")
+      // .attach("imgUrl", "__tests__/images/gambar1-2.png")
       .set("access_token", access_token);
     expect(response.status).toBe(400);
     expect(response.body).toHaveProperty("msg", "Price is required");
@@ -241,7 +241,7 @@ describe("test table Products", () => {
       .field("color", createProduct.color)
       .field("stock", createProduct.stock)
       .attach("imgUrl", "__tests__/images/gambar1-1.png")
-      .attach("imgUrl", "__tests__/images/gambar1-2.png")
+      // .attach("imgUrl", "__tests__/images/gambar1-2.png")
       .set("access_token", access_token);
     expect(response.status).toBe(400);
     expect(response.body).toHaveProperty("msg", "Description is required");
@@ -256,7 +256,7 @@ describe("test table Products", () => {
       .field("color", createProduct.color)
       .field("stock", "")
       .attach("imgUrl", "__tests__/images/gambar1-1.png")
-      .attach("imgUrl", "__tests__/images/gambar1-2.png")
+      // .attach("imgUrl", "__tests__/images/gambar1-2.png")
       .set("access_token", access_token);
     expect(response.status).toBe(400);
     expect(response.body).toHaveProperty("msg", "Stock is required");
@@ -271,7 +271,7 @@ describe("test table Products", () => {
       .field("color", createProduct.color)
       .field("stock", 0)
       .attach("imgUrl", "__tests__/images/gambar1-1.png")
-      .attach("imgUrl", "__tests__/images/gambar1-2.png")
+      // .attach("imgUrl", "__tests__/images/gambar1-2.png")
       .set("access_token", access_token);
     expect(response.status).toBe(400);
     expect(response.body).toHaveProperty("msg", "Stock min is 1");
@@ -286,7 +286,7 @@ describe("test table Products", () => {
       .field("color", createProduct.color)
       .field("stock", createProduct.stock)
       .attach("imgUrl", "__tests__/images/gambar1-1.png")
-      .attach("imgUrl", "__tests__/images/gambar1-2.png")
+      // .attach("imgUrl", "__tests__/images/gambar1-2.png")
       .set("access_token", access_token);
     expect(response.status).toBe(400);
     expect(response.body).toHaveProperty("msg", "Category id is required");
@@ -301,7 +301,7 @@ describe("test table Products", () => {
       .field("color", "")
       .field("stock", createProduct.stock)
       .attach("imgUrl", "__tests__/images/gambar1-1.png")
-      .attach("imgUrl", "__tests__/images/gambar1-2.png")
+      // .attach("imgUrl", "__tests__/images/gambar1-2.png")
       .set("access_token", access_token);
     expect(response.status).toBe(400);
     expect(response.body).toHaveProperty("msg", "Color is required");

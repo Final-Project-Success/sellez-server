@@ -41,7 +41,7 @@ describe("test table Users", () => {
   test("testing Register if success", async () => {
     const response = await request(app).post("/register").send(dataUser);
     // expect(response.status).toBe(201);
-    console.log(response, "dari user test");
+    // console.log(response, "dari user test");
   });
   test("testing Register if email already used", async () => {
     const dataUser1 = {

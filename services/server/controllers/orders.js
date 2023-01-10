@@ -85,7 +85,6 @@ class Controller {
         }
       });
     } catch (err) {
-      console.log(err, "<><><><><><><><><><");
       next(err);
     }
   }
@@ -112,7 +111,7 @@ class Controller {
     try {
       const { id } = req.params;
       const order = await Order.findByPk(id, { include: User });
-
+      console.log(order, "dari order");
       if (!order) {
         throw {
           name: "Order Not Found",
@@ -177,7 +176,7 @@ class Controller {
   static async updateStatusOrder(req, res, next) {
     try {
       const order = await Order.findOne({ where: { invoice: req.body.id } });
-
+      console.log(order, "disiniiiii");
       if (!order) {
         throw {
           name: "Order Not Found",
@@ -208,6 +207,7 @@ class Controller {
       );
       res.status(200).json(data);
     } catch (error) {
+      console.log(error, "dari siniii");
       next(error);
     }
   }
@@ -244,7 +244,6 @@ class Controller {
 
       res.status(200).json(data);
     } catch (error) {
-      console.log(error, "dari sini");
       next(error);
     }
   }
