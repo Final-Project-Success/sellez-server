@@ -309,66 +309,91 @@ describe("test table Orders", () => {
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty("rajaongkir");
   });
-  // test("testing raja ongkir cost if success", async () => {
-  //   const cost = {
-  //     query: {
-  //       origin: "22",
-  //       destination: "114",
-  //       weight: 2000,
-  //       courier: "jne",
-  //     },
-  //     status: {
-  //       code: 200,
-  //       description: "OK",
-  //     },
-  //     origin_details: {
-  //       city_id: "22",
-  //       province_id: "9",
-  //       province: "Jawa Barat",
-  //       type: "Kabupaten",
-  //       city_name: "Bandung",
-  //       postal_code: "40311",
-  //     },
-  //     destination_details: {
-  //       city_id: "114",
-  //       province_id: "1",
-  //       province: "Bali",
-  //       type: "Kota",
-  //       city_name: "Denpasar",
-  //       postal_code: "80227",
-  //     },
-  //     results: [
-  //       {
-  //         code: "jne",
-  //         name: "Jalur Nugraha Ekakurir (JNE)",
-  //         costs: [
-  //           {
-  //             service: "OKE",
-  //             description: "Ongkos Kirim Ekonomis",
-  //             cost: [
-  //               {
-  //                 value: 44000,
-  //                 etd: "2-3",
-  //                 note: "",
-  //               },
-  //             ],
-  //           },
-  //         ],
-  //       },
-  //     ],
-  //   };
-  //   axios.post.mockResolvedValue({ data: cost.rajaongkir });
-  //   const response = await request(app)
-  //     .get("/orders/cost")
-  //     .set("access_token", access_token)
-  //     .send({
-  //       origin: 1,
-  //       destination: 2,
-  //       weight: 2000,
-  //       courier: "jne",
-  //     });
-  //   expect(response.status).toBe(200);
-  // });
+  test("testing raja ongkir cost if success", async () => {
+    const cost = {
+      rajaongkir: {
+        query: {
+          origin: "22",
+          destination: "114",
+          weight: 2000,
+          courier: "jne",
+        },
+        status: {
+          code: 200,
+          description: "OK",
+        },
+        origin_details: {
+          city_id: "22",
+          province_id: "9",
+          province: "Jawa Barat",
+          type: "Kabupaten",
+          city_name: "Bandung",
+          postal_code: "40311",
+        },
+        destination_details: {
+          city_id: "114",
+          province_id: "1",
+          province: "Bali",
+          type: "Kota",
+          city_name: "Denpasar",
+          postal_code: "80227",
+        },
+        results: [
+          {
+            code: "jne",
+            name: "Jalur Nugraha Ekakurir (JNE)",
+            costs: [
+              {
+                service: "OKE",
+                description: "Ongkos Kirim Ekonomis",
+                cost: [
+                  {
+                    value: 44000,
+                    etd: "2-3",
+                    note: "",
+                  },
+                ],
+              },
+              {
+                service: "REG",
+                description: "Layanan Reguler",
+                cost: [
+                  {
+                    value: 48000,
+                    etd: "1-2",
+                    note: "",
+                  },
+                ],
+              },
+              {
+                service: "YES",
+                description: "Yakin Esok Sampai",
+                cost: [
+                  {
+                    value: 70000,
+                    etd: "1-1",
+                    note: "",
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    };
+    axios.post.mockResolvedValue({ data: cost });
+    const response = await request(app)
+      .get("/orders/cost")
+      .set("access_token", access_token)
+      .send({
+        origin: 1,
+        destination: 2,
+        weight: 2000,
+        courier: "jne",
+      });
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty("rajaongkir");
+  });
 });
 afterAll(async () => {
   await queryInterface.bulkDelete("Categories", null, {

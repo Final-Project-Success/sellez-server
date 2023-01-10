@@ -167,7 +167,6 @@ class Controller {
           },
         }
       );
-      console.log("masuuuukkkk siniii");
       res.status(200).json(data);
     } catch (error) {
       next(error);
@@ -177,21 +176,21 @@ class Controller {
     try {
       // console.log("object");
       const { origin, destination, weight, courier } = req.body;
+      const request = {
+        origin,
+        destination,
+        weight,
+        courier,
+      };
       const { data } = await axios.post(
         `https://api.rajaongkir.com/starter/cost`,
+        request,
         {
           headers: {
             key: process.env.RAJA_ONGKIR,
           },
-          data: {
-            origin,
-            destination,
-            weight,
-            courier,
-          },
         }
       );
-
       // let response = {
       //   originType: data.rajaongkir.origin_details.type,
       //   originName: data.rajaongkir.origin_details.city_name,
@@ -204,8 +203,9 @@ class Controller {
       //   // price: data.rajaongkir.results[0].costs[0].cost[0].value,
       // };
 
-      res.status(200).json(data.rajaongkir);
+      res.status(200).json(data);
     } catch (error) {
+      console.log(error, "dari sini");
       next(error);
     }
   }

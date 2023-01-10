@@ -242,7 +242,7 @@ describe("test table Users", () => {
   test("testing verifyAccount if OTP is empty", async () => {
     const otp = "";
     const response = await request(app)
-      .patch("/activations")
+      .get("/verification")
       .set("access_token", access_token);
     // console.log(response.body);
     expect(response.status).toBe(401);
@@ -254,7 +254,7 @@ describe("test table Users", () => {
   test("testing findedUser if success", async () => {
     jest.spyOn(Otp, "findOne").mockResolvedValueOnce({ otp: "testing" });
     const response = await request(app)
-      .patch("/activations")
+      .get("/verification")
       .set("access_token", access_token)
       .send({ otp: "1111" });
     expect(response.status).toBe(401);
@@ -263,7 +263,7 @@ describe("test table Users", () => {
   test("testing findedUser if success", async () => {
     jest.spyOn(Otp, "findOne").mockResolvedValueOnce({ otp: "testing" });
     const response = await request(app)
-      .patch("/activations")
+      .get("/verification")
       .set("access_token", access_token)
       .send({ otp: "testing" });
     expect(response.status).toBe(200);
@@ -275,7 +275,7 @@ describe("test table Users", () => {
   test("testing findedUser if success", async () => {
     jest.spyOn(Otp, "findOne").mockRejectedValueOnce({ otp: "testing" });
     const response = await request(app)
-      .patch("/activations")
+      .patch("/verification")
       .set("access_token", access_token)
       .send({ otp: "testing" });
     expect(response.status).toBe(500);
