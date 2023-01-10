@@ -95,6 +95,9 @@ module.exports = (sequelize, DataTypes) => {
           },
         },
       },
+      verified: {
+        type: DataTypes.BOOLEAN,
+      },
     },
     {
       sequelize,

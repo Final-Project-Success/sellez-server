@@ -7,6 +7,6 @@ router
   .post("/login", Controller.login)
   .post("/register", Controller.register)
   .post("/login-oauth", Controller.oauthLogin)
-  .patch("/activations", Controller.verifyAccount);
+  .patch("/activations", authentication, Controller.verifyAccount);
 
 module.exports = router;

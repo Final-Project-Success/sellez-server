@@ -1,6 +1,6 @@
 const { comparePassword } = require("../helpers/bcrypt");
 const { jwtSign } = require("../helpers/jwt");
-const { User, otp } = require("../models");
+const { User, Otp } = require("../models");
 const otpGenerator = require("otp-generator");
 const nodemailer = require("nodemailer");
 
@@ -29,8 +29,8 @@ class Controller {
       let createdOTP = otpGenerator.generate(10, {});
       console.log(createdOTP);
 
-      const registerOTP = await otp.create({
-        idUser: newUser.id,
+      const registerOTP = await Otp.create({
+        UserId: newUser.id,
         otp: createdOTP,
       });
 
@@ -122,7 +122,22 @@ class Controller {
   }
   static async verifyAccount(req, res, next) {
     try {
+      let { otp } = req.body;
+      if (!otp) {
+        res.status(401).json({ message: "Please fill your activation code" });
+      }
+      let findedUser = await Otp.findOne({ where: { UserId: req.User.id } });
+      if (otp !== findedUser.otp) {
+        res.status(401).json({ message: "Wrong Activation Code" });
+      } else {
+        let updatedUser = await User.update(
+          { verified: true },
+          { where: { id: req.User.id } }
+        );
+        res.status(200).json({ message: "Your Account Has Been Verified" });
+      }
     } catch (error) {
+      console.log(error);
       next(error);
     }
   }
