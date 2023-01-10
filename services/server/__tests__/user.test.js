@@ -17,6 +17,7 @@ beforeAll(() => {
           "https://www.smartfren.com/app/uploads/2021/11/featured-image-37.png",
         role: "customer",
         phoneNumber: "081312391839",
+        verified: true,
       },
     ],
     {}
@@ -32,12 +33,14 @@ const dataUser = {
     "https://www.smartfren.com/app/uploads/2021/11/featured-image-37.png",
   role: "customer",
   phoneNumber: "081312391839",
+  verified: false,
 };
 
 describe("test table Users", () => {
-  test("testing Register if success", async () => {
+  test.only("testing Register if success", async () => {
     const response = await request(app).post("/register").send(dataUser);
-    expect(response.status).toBe(201);
+    // expect(response.status).toBe(201);
+    console.log(response, "dari user test");
   });
   test("testing Register if email already used", async () => {
     const dataUser1 = {

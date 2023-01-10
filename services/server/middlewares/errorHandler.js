@@ -1,5 +1,5 @@
 function errorHandler(err, req, res, next) {
-  console.log(err);
+  console.log(err, "dari error handler");
   let status = 500;
   let msg = "Internal Server Error";
 
