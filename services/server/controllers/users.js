@@ -7,21 +7,13 @@ const nodemailer = require("nodemailer");
 class Controller {
   static async register(req, res, next) {
     try {
-      const {
-        username,
-        email,
-        password,
-        address,
-        profilePict,
-        role,
-        phoneNumber,
-      } = req.body;
+      const { username, email, password, address, role, phoneNumber } =
+        req.body;
       const newUser = await User.create({
         username,
         email,
         password,
         address,
-        profilePict,
         role,
         phoneNumber,
       });
@@ -91,14 +83,19 @@ class Controller {
 
       const access_token = jwtSign({ id: findUser.id });
 
-      res.status(200).json({ access_token, msg: "Login Success!" });
+      res.status(200).json({
+        access_token,
+        username: findUser.username,
+        role: findUser.role,
+        msg: "Login Success!",
+      });
     } catch (err) {
       next(err);
     }
   }
   static async oauthLogin(req, res, next) {
     try {
-      const { email, username, profilePict } = req.body;
+      const { email, username } = req.body;
       const [user, created] = await User.findOrCreate({
         where: { email },
         defaults: {
@@ -106,7 +103,6 @@ class Controller {
           email,
           password: "oauth",
           address: "oauth",
-          profilePict,
           role: "customer",
           phoneNumber: "oauth",
         },
@@ -115,7 +111,12 @@ class Controller {
 
       const access_token = jwtSign({ id: user ? user.id : created.id });
 
-      res.status(200).json({ access_token, msg: "Login Success" });
+      res.status(200).json({
+        access_token,
+        role: user ? user.role : created.role,
+        username: user ? user.username : created.username,
+        msg: "Login Success",
+      });
     } catch (err) {
       next(err);
     }

@@ -1,15 +1,18 @@
 require("dotenv").config();
+
 const express = require("express");
 const app = express();
 const http = require("http");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const server = http.createServer(app);
+const { Server } = require("socket.io");
+
+const Message = require("./models/messages");
+
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-const server = http.createServer(app);
-const { Server } = require("socket.io");
-const Message = require("./models/messages");
 
 const io = new Server(server, {
   cors: {
