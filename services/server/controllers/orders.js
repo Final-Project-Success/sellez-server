@@ -1,4 +1,4 @@
-const { Order, OrderProduct, Product, sequelize } = require("../models");
+const { Order, OrderProduct, User, sequelize } = require("../models");
 const redis = require("../config/connectRedis");
 const axios = require("axios");
 const Xendit = require("xendit-node");
@@ -58,7 +58,7 @@ class Controller {
         return res.status(200).json(JSON.parse(chaceData));
       }
 
-      const orders = await Order.findAll();
+      const orders = await Order.findAll({ include: User });
 
       await redis.set("sellez-orders", JSON.stringify(orders));
 
@@ -70,7 +70,7 @@ class Controller {
   static async readOneOrder(req, res, next) {
     try {
       const { id } = req.params;
-      const order = await Order.findByPk(id);
+      const order = await Order.findByPk(id, { include: User });
 
       if (!order) {
         throw {
