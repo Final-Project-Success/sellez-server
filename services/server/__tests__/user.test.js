@@ -23,6 +23,9 @@ beforeAll(async () => {
   );
   access_token = jwtSign({ id: 1 });
 });
+beforeEach(() => {
+  jest.restoreAllMocks();
+});
 
 const dataUser = {
   username: "user2",
@@ -190,7 +193,25 @@ describe("test table Users", () => {
     expect(response.status).toBe(500);
     expect(response.body).toHaveProperty("msg", "Internal Server Error");
   });
-  test("testing get OTP if success", async () => {});
+  test("testing get Users if success", async () => {
+    const response = await request(app).get("/user");
+    expect(response.status).toBe(200);
+    response.body.forEach((el) => {
+      expect(el).toHaveProperty("email", expect.any(String));
+      expect(el).toHaveProperty("address", expect.any(String));
+      expect(el).toHaveProperty("id", expect.any(Number));
+      expect(el).toHaveProperty("phoneNumber", expect.any(String));
+      expect(el).toHaveProperty("role", expect.any(String));
+      expect(el).toHaveProperty("username", expect.any(String));
+    });
+  });
+  test("testing get Users if fail", async () => {
+    jest
+      .spyOn(User, "findAll")
+      .mockRejectedValue(() => Promise.reject({ name: "something wrong" }));
+    const response = await request(app).get("/user");
+    expect(response.status).toBe(500);
+  });
   test("testing login if email doesn't match", async () => {
     const data = {
       ...dataUser,
@@ -251,7 +272,7 @@ describe("test table Users", () => {
       "Please fill your activation code"
     );
   });
-  test("testing findedUser if success", async () => {
+  test("testing findedUser if fail", async () => {
     jest.spyOn(Otp, "findOne").mockResolvedValueOnce({ otp: "testing" });
     const response = await request(app)
       .get("/verification")
@@ -260,7 +281,7 @@ describe("test table Users", () => {
     expect(response.status).toBe(401);
     expect(response.body).toHaveProperty("message", "Wrong Activation Code");
   });
-  test("testing findedUser if success", async () => {
+  test("testing findedUser if fail", async () => {
     jest.spyOn(Otp, "findOne").mockResolvedValueOnce({ otp: "testing" });
     const response = await request(app)
       .get("/verification")
@@ -272,10 +293,10 @@ describe("test table Users", () => {
       "Your Account Has Been Verified"
     );
   });
-  test("testing findedUser if success", async () => {
+  test("testing findedUser if fail", async () => {
     jest.spyOn(Otp, "findOne").mockRejectedValueOnce({ otp: "testing" });
     const response = await request(app)
-      .patch("/verification")
+      .get("/verification")
       .set("access_token", access_token)
       .send({ otp: "testing" });
     expect(response.status).toBe(500);
