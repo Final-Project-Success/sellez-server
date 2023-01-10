@@ -128,7 +128,7 @@ class Controller {
       );
 
       await redis.del("sellez-orders");
-
+      console.log(invoice);
       res.status(200).json({ msg: "Success to order", invoice: invoice });
     } catch (err) {
       next(err);
