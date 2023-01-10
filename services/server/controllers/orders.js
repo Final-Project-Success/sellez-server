@@ -1,4 +1,4 @@
-const { Order, User } = require("../models");
+const { Order, OrderProduct, User, sequelize } = require("../models");
 const redis = require("../config/connectRedis");
 const axios = require("axios");
 const Xendit = require("xendit-node");
@@ -15,18 +15,37 @@ const p = new Payout(payoutSpecificOptions);
 class Controller {
   static async addOrders(req, res, next) {
     try {
-      const { totalPrice, shippingCost } = req.body;
+      const { totalPrice, shippingCost, products } = req.body;
 
-      const newOrder = await Order.create({
-        totalPrice,
-        UserId: req.User.id,
-        shippingCost,
-        status: false,
+      const result = await sequelize.transaction(async (t) => {
+        const newOrder = await Order.create(
+          {
+            totalPrice,
+            UserId: req.User.id,
+            shippingCost,
+            status: false,
+          },
+          { transaction: t }
+        );
+
+        const data = products.map((el) => {
+          return {
+            ProductId: el.id,
+            OrderId: newOrder.id,
+            quantity: el.quantity,
+            price: el.price,
+            subTotal: el.price * el.quantity,
+          };
+        });
+
+        await OrderProduct.bulkCreate(data, { transaction: t });
+
+        return newOrder;
       });
-
+      await redis.del("sellez-orderProducts");
       await redis.del("sellez-orders");
 
-      res.status(201).json(newOrder);
+      res.status(201).json(result);
     } catch (err) {
       next(err);
     }
@@ -39,7 +58,7 @@ class Controller {
         return res.status(200).json(JSON.parse(chaceData));
       }
 
-      const orders = await Order.findAll();
+      const orders = await Order.findAll({ include: User });
 
       await redis.set("sellez-orders", JSON.stringify(orders));
 
@@ -51,7 +70,7 @@ class Controller {
   static async readOneOrder(req, res, next) {
     try {
       const { id } = req.params;
-      const order = await Order.findByPk(id);
+      const order = await Order.findByPk(id, { include: User });
 
       if (!order) {
         throw {

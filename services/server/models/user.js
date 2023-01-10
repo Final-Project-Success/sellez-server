@@ -10,6 +10,9 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      this.hasMany(models.Order, {
+        foreignKey: "UserId",
+      });
     }
   }
   User.init(
@@ -68,18 +71,6 @@ module.exports = (sequelize, DataTypes) => {
           },
         },
       },
-      profilePict: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-          notNull: {
-            msg: "Profile pict is required",
-          },
-          notEmpty: {
-            msg: "Profile pict is required",
-          },
-        },
-      },
       role: {
         type: DataTypes.STRING,
       },
@@ -95,6 +86,9 @@ module.exports = (sequelize, DataTypes) => {
           },
         },
       },
+      verified: {
+        type: DataTypes.BOOLEAN,
+      },
     },
     {
       sequelize,
@@ -102,13 +96,11 @@ module.exports = (sequelize, DataTypes) => {
       hooks: {
         beforeCreate(user) {
           user.password = hashPassword(user.password);
+          user.verified = false;
         },
       },
     }
   );
-  User.beforeCreate(async (user) => {
-    user.verified = false;
-  });
 
   return User;
 };

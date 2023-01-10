@@ -20,13 +20,8 @@ module.exports = {
         },
         {
           name: "T-Shirts",
-        },
-        {
-          name: "Sandals",
-        },
-        {
-          name: "Pants",
-        },
+        }
+       
       ],
       {}
     );

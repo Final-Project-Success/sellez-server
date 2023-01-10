@@ -1,13 +1,36 @@
 const Controller = require("../controllers/users");
-const authentication = require("../middlewares/authentication");
+const { authentication } = require("../middlewares/authentication");
+// const authentication = require("../middlewares/authentication");
+const cloudinary = require("cloudinary").v2;
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const multer = require("multer");
 const router = require("express").Router();
+
+cloudinary.config({
+  cloud_name: "dqschoc1m",
+  api_key: "632682329878361",
+  api_secret: "ye8aEWOo7ilmDtWr7k0wUVmkEX8",
+});
+
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "JKT48",
+  },
+});
+
+const upload = multer({ storage: storage });
 
 router
   .post("/login", Controller.login)
   .post("/register", Controller.register)
   .post("/login-oauth", Controller.oauthLogin)
+<<<<<<< HEAD
   .get("/user", Controller.getUsers)
   .get("/verification", authentication, Controller.verificationEmail);
+=======
+  .patch("/activations", authentication, Controller.verifyAccount);
+>>>>>>> a2a528466585ea3e3cec91cacc0ad921f65ebe22
 
 
 module.exports = router;
