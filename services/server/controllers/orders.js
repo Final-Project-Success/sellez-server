@@ -17,7 +17,6 @@ class Controller {
   static async addOrders(req, res, next) {
     try {
       const { totalPrice, shippingCost, products } = req.body;
-      console.log(products, "<<<<<<<<<<<<<");
       let p = JSON.parse(products);
       let mapping = p.map((el) => {
         return {
@@ -75,18 +74,16 @@ class Controller {
           });
 
           let c = await OrderProduct.bulkCreate(data, { transaction: t });
-          // console.log("masuk");
-          // await t.commit();
+          await t.commit();
+          res.status(200).json({ invoice_url: invoice.invoice_url });
           return newOrder;
         } catch (error) {
           console.log(error);
-          // await t.rollback();
+          await t.rollback();
         }
       });
       // await redis.del("sellez-orderProducts");
       // await redis.del("sellez-orders");
-
-      // res.status(201).json({invoice_url: invoice_url});
     } catch (err) {
       next(err);
     }
