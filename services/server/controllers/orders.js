@@ -136,7 +136,6 @@ class Controller {
   }
   static async updateStatusOrder(req, res, next) {
     try {
-      const { id } = req.params;
       const order = await Order.findOne({ where: { invoice: req.body.id } });
 
       if (!order) {
