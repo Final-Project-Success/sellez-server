@@ -1,9 +1,9 @@
 const Controller = require("../controllers/users");
 const { authentication } = require("../middlewares/authentication");
 // const authentication = require("../middlewares/authentication");
-const cloudinary = require("cloudinary").v2
+const cloudinary = require("cloudinary").v2;
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
-const multer = require('multer');
+const multer = require("multer");
 const router = require("express").Router();
 
 cloudinary.config({
@@ -23,7 +23,7 @@ const upload = multer({ storage: storage });
 
 router
   .post("/login", Controller.login)
-  .post("/register", upload.single("profilePict"),Controller.register)
+  .post("/register", Controller.register)
   .post("/login-oauth", Controller.oauthLogin)
   .patch("/activations", authentication, Controller.verifyAccount);
 
