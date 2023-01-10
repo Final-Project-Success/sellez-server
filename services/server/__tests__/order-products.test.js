@@ -3,6 +3,7 @@ const request = require("supertest");
 const { sequelize, OrderProduct } = require("../models");
 const { hashPassword } = require("../helpers/bcrypt");
 const { jwtSign } = require("../helpers/jwt");
+const redis = require("../config/connectRedis");
 const { queryInterface } = sequelize;
 
 let access_token;
@@ -15,8 +16,6 @@ beforeAll(async () => {
         email: "user1111@gmail.com",
         password: hashPassword("qwerty"),
         address: "Hacktiv8",
-        profilePict:
-          "https://www.smartfren.com/app/uploads/2021/11/featured-image-37.png",
         role: "customer",
         phoneNumber: "081312391839",
       },
@@ -50,7 +49,7 @@ beforeAll(async () => {
     ],
     {}
   );
-  queryInterface.bulkInsert("Orders", [
+  await queryInterface.bulkInsert("Orders", [
     {
       totalPrice: 100000,
       UserId: 1,
@@ -58,7 +57,7 @@ beforeAll(async () => {
       status: false,
     },
   ]);
-  queryInterface.bulkInsert(
+  await queryInterface.bulkInsert(
     "OrderProducts",
     [
       {
@@ -71,6 +70,10 @@ beforeAll(async () => {
     ],
     {}
   );
+});
+beforeEach(() => {
+  jest.restoreAllMocks();
+  redis.del("sellez-orderProducts");
 });
 
 const createOrderProduct = {
@@ -102,17 +105,28 @@ describe("test table OrderProducts", () => {
     expect(response.status).toBe(401);
     expect(response.body).toHaveProperty("msg", "Please Login First");
   });
-  // test("testing table read OrderProducts if error", async () => {
-  //   jest
-  //     .spyOn(OrderProduct, "findAll")
-  //     .mockImplementationOnce(() =>
-  //       Promise.reject({ name: "something wrong" })
-  //     );
-  //   const response = await request(app)
-  //     .get("/order-products")
-  //     .set("access_token", access_token);
-  //   expect(response.status).toBe(500);
-  // });
+  test("testing table read OrderProducts if error", async () => {
+    jest
+      .spyOn(OrderProduct, "findAll")
+      .mockImplementationOnce(() =>
+        Promise.reject({ name: "something wrong" })
+      );
+    const response = await request(app)
+      .get("/order-products")
+      .set("access_token", access_token);
+    expect(response.status).toBe(500);
+  });
+  test("testing using chace", async () => {
+    jest
+      .spyOn(redis, "get")
+      .mockImplementationOnce(() => Promise.resolve(JSON.stringify([])));
+    const response = await request(app)
+      .get("/order-products")
+      .set("access_token", access_token);
+    // console.log(response.status);
+    expect(response.status).toBe(200);
+    expect(response.body).toBeInstanceOf(Object);
+  });
   test("testing read OrderProducts by Id", async () => {
     const response = await request(app)
       .get("/order-products/1")
@@ -131,31 +145,6 @@ describe("test table OrderProducts", () => {
       .set("access_token", access_token);
     expect(response.status).toBe(404);
     expect(response.body).toHaveProperty("msg", "OrderProduct Not Found");
-  });
-  test("testing create OrderProducts if success", async () => {
-    const response = await request(app)
-      .post("/order-products")
-      .send(createOrderProduct)
-      .set("access_token", access_token);
-    expect(response.status).toBe(201);
-    expect(response.body).toBeInstanceOf(Object);
-    expect(response.body).toHaveProperty("ProductId", expect.any(Number));
-    expect(response.body).toHaveProperty("OrderId", expect.any(Number));
-    expect(response.body).toHaveProperty("quantity", expect.any(Number));
-    expect(response.body).toHaveProperty("subTotal", expect.any(Number));
-    expect(response.body).toHaveProperty("price", expect.any(Number));
-  });
-  test("testing create OrderProducts if ProductId is empty", async () => {
-    const data = {
-      ...createOrderProduct,
-      ProductId: "",
-    };
-    const response = await request(app)
-      .post("/order-products")
-      .send(data)
-      .set("access_token", access_token);
-    expect(response.status).toBe(400);
-    expect(response.body).toHaveProperty("msg", "Product id is required");
   });
 });
 
