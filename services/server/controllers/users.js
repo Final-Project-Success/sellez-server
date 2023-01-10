@@ -16,6 +16,7 @@ class Controller {
         address,
         role,
         phoneNumber,
+        verified: false,
       });
 
       let createdOTP = otpGenerator.generate(10, {});
