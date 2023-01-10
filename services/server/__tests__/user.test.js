@@ -1,11 +1,13 @@
 const app = require("../app");
 const request = require("supertest");
-const { sequelize, User } = require("../models");
+const { sequelize, User, Otp } = require("../models");
 const { hashPassword } = require("../helpers/bcrypt");
+const { jwtSign } = require("../helpers/jwt");
 const { queryInterface } = sequelize;
 
-beforeAll(() => {
-  queryInterface.bulkInsert(
+let access_token;
+beforeAll(async () => {
+  await queryInterface.bulkInsert(
     "Users",
     [
       {
@@ -13,15 +15,13 @@ beforeAll(() => {
         email: "user1@gmail.com",
         password: hashPassword("qwerty"),
         address: "Hacktiv8",
-        profilePict:
-          "https://www.smartfren.com/app/uploads/2021/11/featured-image-37.png",
         role: "customer",
         phoneNumber: "081312391839",
-        verified: true,
       },
     ],
     {}
   );
+  access_token = jwtSign({ id: 1 });
 });
 
 const dataUser = {
@@ -29,15 +29,13 @@ const dataUser = {
   email: "user2@gmail.com",
   password: hashPassword("qwerty"),
   address: "Hacktiv8",
-  profilePict:
-    "https://www.smartfren.com/app/uploads/2021/11/featured-image-37.png",
   role: "customer",
   phoneNumber: "081312391839",
   verified: false,
 };
 
 describe("test table Users", () => {
-  test.only("testing Register if success", async () => {
+  test("testing Register if success", async () => {
     const response = await request(app).post("/register").send(dataUser);
     // expect(response.status).toBe(201);
     console.log(response, "dari user test");
@@ -132,24 +130,6 @@ describe("test table Users", () => {
     expect(response.status).toBe(400);
     expect(response.body).toHaveProperty("msg", "Address is required");
   });
-  test("testing Register if Profile Pict is null", async () => {
-    const dataUser1 = {
-      ...dataUser,
-      profilePict: null,
-    };
-    const response = await request(app).post("/register").send(dataUser1);
-    expect(response.status).toBe(400);
-    expect(response.body).toHaveProperty("msg", "Profile pict is required");
-  });
-  test("testing Register if Profile Pict is empty", async () => {
-    const dataUser1 = {
-      ...dataUser,
-      profilePict: "",
-    };
-    const response = await request(app).post("/register").send(dataUser1);
-    expect(response.status).toBe(400);
-    expect(response.body).toHaveProperty("msg", "Profile pict is required");
-  });
   test("testing Register if phoneNumber is null", async () => {
     const dataUser1 = {
       ...dataUser,
@@ -187,6 +167,28 @@ describe("test table Users", () => {
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty("access_token", expect.any(String));
     expect(response.body).toHaveProperty("msg", "Login Success");
+  });
+  test("testing login with oauth if fail", async () => {
+    jest.spyOn(User, "findOne").mockRejectedValueOnce({
+      username: "oauth",
+      email: "oauth@gmail.com",
+      password: "oauth",
+      address: "oauth",
+      profilePict: "oauth",
+      role: "customer",
+      phoneNumber: "oauth",
+    });
+    const response = await request(app).post("/login-oauth").send({
+      username: "oauth",
+      email: "oauth@gmail.com",
+      password: "oauth",
+      address: "oauth",
+      profilePict: "oauth",
+      role: "customer",
+      phoneNumber: "oauth",
+    });
+    expect(response.status).toBe(500);
+    expect(response.body).toHaveProperty("msg", "Internal Server Error");
   });
   test("testing get OTP if success", async () => {});
   test("testing login if email doesn't match", async () => {
@@ -237,10 +239,51 @@ describe("test table Users", () => {
       "Error invalid email or password"
     );
   });
+  test("testing verifyAccount if OTP is empty", async () => {
+    const otp = "";
+    const response = await request(app)
+      .patch("/activations")
+      .set("access_token", access_token);
+    // console.log(response.body);
+    expect(response.status).toBe(401);
+    expect(response.body).toHaveProperty(
+      "message",
+      "Please fill your activation code"
+    );
+  });
+  test("testing findedUser if success", async () => {
+    jest.spyOn(Otp, "findOne").mockResolvedValueOnce({ otp: "testing" });
+    const response = await request(app)
+      .patch("/activations")
+      .set("access_token", access_token)
+      .send({ otp: "1111" });
+    expect(response.status).toBe(401);
+    expect(response.body).toHaveProperty("message", "Wrong Activation Code");
+  });
+  test("testing findedUser if success", async () => {
+    jest.spyOn(Otp, "findOne").mockResolvedValueOnce({ otp: "testing" });
+    const response = await request(app)
+      .patch("/activations")
+      .set("access_token", access_token)
+      .send({ otp: "testing" });
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty(
+      "message",
+      "Your Account Has Been Verified"
+    );
+  });
+  test("testing findedUser if success", async () => {
+    jest.spyOn(Otp, "findOne").mockRejectedValueOnce({ otp: "testing" });
+    const response = await request(app)
+      .patch("/activations")
+      .set("access_token", access_token)
+      .send({ otp: "testing" });
+    expect(response.status).toBe(500);
+  });
 });
 
 afterAll(async () => {
-  queryInterface.bulkDelete("Users", null, {
+  await queryInterface.bulkDelete("Users", null, {
     truncate: true,
     restartIdentity: true,
     cascade: true,

@@ -15,8 +15,6 @@ beforeAll(() => {
         email: "user1111@gmail.com",
         password: hashPassword("qwerty"),
         address: "Hacktiv8",
-        profilePict:
-          "https://www.smartfren.com/app/uploads/2021/11/featured-image-37.png",
         role: "customer",
         phoneNumber: "081312391839",
       },

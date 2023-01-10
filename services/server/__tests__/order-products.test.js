@@ -8,7 +8,7 @@ const { queryInterface } = sequelize;
 
 let access_token;
 beforeAll(async () => {
-  queryInterface.bulkInsert(
+  await queryInterface.bulkInsert(
     "Users",
     [
       {
@@ -16,8 +16,6 @@ beforeAll(async () => {
         email: "user1111@gmail.com",
         password: hashPassword("qwerty"),
         address: "Hacktiv8",
-        profilePict:
-          "https://www.smartfren.com/app/uploads/2021/11/featured-image-37.png",
         role: "customer",
         phoneNumber: "081312391839",
       },
@@ -51,7 +49,7 @@ beforeAll(async () => {
     ],
     {}
   );
-  queryInterface.bulkInsert("Orders", [
+  await queryInterface.bulkInsert("Orders", [
     {
       totalPrice: 100000,
       UserId: 1,
@@ -59,7 +57,7 @@ beforeAll(async () => {
       status: false,
     },
   ]);
-  queryInterface.bulkInsert(
+  await queryInterface.bulkInsert(
     "OrderProducts",
     [
       {

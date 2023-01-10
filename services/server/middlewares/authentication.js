@@ -6,6 +6,8 @@ module.exports = {
     try {
       const { access_token } = req.headers;
 
+      console.log({ access_token });
+
       if (!access_token) {
         throw {
           name: "Unauthorized",
@@ -14,6 +16,9 @@ module.exports = {
 
       const payload = jwtVerify(access_token);
       const user = await User.findByPk(payload.id);
+
+      console.log({ payload });
+      console.log({ user });
 
       if (!user) {
         throw {
