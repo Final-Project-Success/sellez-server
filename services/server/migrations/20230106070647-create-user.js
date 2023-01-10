@@ -26,10 +26,6 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      profilePict: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
       phoneNumber: {
         type: Sequelize.STRING,
         allowNull: false,
