@@ -25,6 +25,6 @@ router
   .post("/login", Controller.login)
   .post("/register", upload.single("profilePict"),Controller.register)
   .post("/login-oauth", Controller.oauthLogin)
-  .get("/otp", authentication, Controller.getOTP);
+  .patch("/activations", authentication, Controller.verifyAccount);
 
 module.exports = router;
