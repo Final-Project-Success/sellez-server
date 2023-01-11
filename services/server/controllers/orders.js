@@ -71,9 +71,9 @@ class Controller {
         });
         let c = await OrderProduct.bulkCreate(data, { transaction: t });
 
-        res.status(201).json({ invoice_url: invoice.invoice_url });
-        return newOrder;
+        return invoice;
       });
+      res.status(201).json({ invoice_url: result.invoice_url });
     } catch (err) {
       next(err);
     }
@@ -95,6 +95,24 @@ class Controller {
       next(err);
     }
   }
+
+   static async readAllOrdersAdmin(req, res, next) {
+    try {
+      // const chaceData = await redis.get("sellez-orders");
+      // if (chaceData) {
+      //   return res.status(200).json(JSON.parse(chaceData));
+      // }
+   
+      const orders = await Order.findAll();
+
+      // await redis.set("sellez-orders", JSON.stringify(orders));
+
+      res.status(200).json(orders);
+    } catch (err) {
+      next(err);
+    }
+  }
+
   static async readOneOrder(req, res, next) {
     try {
       const { id } = req.params;
