@@ -4,7 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "npx jest --runInBand --forceExit --setTimeout=500 --verbose --coverage __test__/",
+    "test": "npx jest --runInBand --forceExit --setTimeout=500 --verbose --coverage",
     "start": "node bin/www.js",
     "dev": "nodemon bin/www.js"
   },
