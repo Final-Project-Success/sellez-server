@@ -26,7 +26,6 @@ class Controller {
           url: el.imgUrl,
         };
       });
-
       const result = await sequelize.transaction(async (t) => {
         let idPayout = "invoice-sellez-id-" + new Date().getTime().toString(); //
         let invoice = await i.createInvoice({
@@ -44,7 +43,6 @@ class Controller {
             },
           ],
         });
-
         const newOrder = await Order.create(
           {
             totalPrice,
@@ -55,7 +53,6 @@ class Controller {
           },
           { transaction: t }
         );
-
         const data = await p.map((el) => {
           Product.decrement("stock", {
             by: el.cartQuantity,
@@ -72,13 +69,13 @@ class Controller {
             updatedAt: new Date(),
           };
         });
-
         let c = await OrderProduct.bulkCreate(data, { transaction: t });
 
-        res.status(200).json({ invoice_url: invoice.invoice_url });
+        res.status(201).json({ invoice_url: invoice.invoice_url });
         return newOrder;
       });
     } catch (err) {
+      console.log(err);
       next(err);
     }
   }
@@ -178,7 +175,6 @@ class Controller {
       );
       res.status(200).json(data);
     } catch (error) {
-      console.log(error, "dari siniii");
       next(error);
     }
   }
