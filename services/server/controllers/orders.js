@@ -122,7 +122,7 @@ class Controller {
     try {
       let x = req.headers["x-callback-token"];
       let { status, paid_amount, id } = req.body;
-      if (x !== "MAK8CELq5HOfMOAGkNi9Ys5VzPhzqmz2dklDwzalG16AOMFk") {
+      if (x !== process.env.XENDIT_X) {
         res.status(401).json({ message: "You are not authorized" });
       }
       if (status === "PAID") {
