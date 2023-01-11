@@ -13,7 +13,8 @@ router
   .use("/", userRouter)
   .use("/products", productRouter)
   .use("/categories", categoryRouter)
-  .use("/order-products", orderProductRouter)
-  .use("/orders", orderRouter);
+  .use("/orders", orderRouter)
+  .use(authentication)
+  .use("/order-products", orderProductRouter);
 
 module.exports = router;

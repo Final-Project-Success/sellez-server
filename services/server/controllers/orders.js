@@ -29,19 +29,22 @@ class Controller {
       console.log("masuk sini 1");
       const result = await sequelize.transaction(async (t) => {
         let idPayout = "invoice-sellez-id-" + new Date().getTime().toString(); //
-        console.log({
-          externalID: idPayout,
-          payerEmail: req.User.email,
-          description: `Invoice for ${idPayout}`,
-          amount: totalPrice,
-          items: mapping,
-          fees: [
-            {
-              type: "Handling Fee",
-              value: shippingCost,
-            },
-          ],
-        });
+        console.log(
+          {
+            externalID: idPayout,
+            payerEmail: req.User.email,
+            description: `Invoice for ${idPayout}`,
+            amount: totalPrice,
+            items: mapping,
+            fees: [
+              {
+                type: "Handling Fee",
+                value: shippingCost,
+              },
+            ],
+          },
+          "Tes masuk sini"
+        );
         let invoice = await i.createInvoice({
           externalID: idPayout,
           payerEmail: req.User.email,
@@ -202,6 +205,7 @@ class Controller {
         msg: "Order already paid",
       });
     } catch (err) {
+      console.log(err, "dari order");
       next(err);
     }
   }

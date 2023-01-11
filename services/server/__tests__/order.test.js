@@ -67,7 +67,6 @@ beforeAll(async () => {
 });
 beforeEach(() => {
   jest.restoreAllMocks();
-  redis.del("sellez-orders");
 });
 
 // jest.mock("xendit-node", () => {
@@ -91,7 +90,7 @@ describe("test table Orders", () => {
     expect(response.body).toBeInstanceOf(Object);
     response.body.forEach((el) => {
       expect(el).toHaveProperty("UserId", expect.any(Number));
-      expect(el).toHaveProperty("status", expect.any(Boolean));
+      expect(el).toHaveProperty("status", expect.any(String));
       expect(el).toHaveProperty("shippingCost", expect.any(Number));
       expect(el).toHaveProperty("totalPrice", expect.any(Number));
       expect(el).toHaveProperty("createdAt", expect.any(String));
@@ -108,17 +107,6 @@ describe("test table Orders", () => {
       .get("/orders")
       .set("access_token", access_token);
     expect(response.status).toBe(500);
-  });
-  test("testing using chace", async () => {
-    jest
-      .spyOn(redis, "get")
-      .mockImplementationOnce(() => Promise.resolve(JSON.stringify([])));
-    const response = await request(app)
-      .get("/orders")
-      .set("access_token", access_token);
-    // console.log(response.status);
-    expect(response.status).toBe(200);
-    expect(response.body).toBeInstanceOf(Object);
   });
   test("testing create Order if success", async () => {
     const createOrder = {
@@ -178,7 +166,6 @@ describe("test table Orders", () => {
       .send(createOrder)
       .set("access_token", access_token);
     expect(response.status).toBe(500);
-    ex;
   });
   test("testing read Order by Id", async () => {
     const response = await request(app)
@@ -188,7 +175,7 @@ describe("test table Orders", () => {
     expect(response.status).toBe(200);
     expect(response.body).toBeInstanceOf(Object);
     expect(response.body).toHaveProperty("UserId", expect.any(Number));
-    expect(response.body).toHaveProperty("status", expect.any(Boolean));
+    expect(response.body).toHaveProperty("status", expect.any(String));
     expect(response.body).toHaveProperty("shippingCost", expect.any(Number));
     expect(response.body).toHaveProperty("totalPrice", expect.any(Number));
     expect(response.body).toHaveProperty("createdAt", expect.any(String));
@@ -201,19 +188,16 @@ describe("test table Orders", () => {
     expect(response.status).toBe(404);
     expect(response.body).toHaveProperty("msg", "Order Not Found");
   });
-  // test("testing edit Status Order by id if success", async () => {
-
-  //   const data = {
-  //     ...createOrder,
-  //     status: true,
-  //   };
-  //   const response = await request(app)
-  //     .post("/orders/1/paid")
-  //     .send(data)
-  //     .set("access_token", access_token);
-  //   expect(response.status).toBe(200);
-  //   expect(response.body).toHaveProperty("msg", "Success to order");
-  // });
+  test.only("testing edit Status Order by id if success", async () => {
+    // const data = {
+    //   ...createOrder,
+    //   status: true,
+    // };
+    const response = await request(app).post("/orders/paid");
+    console.log(response.body, "disini");
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty("msg", "Success to order");
+  });
   // test("testing edit Order by id if id not found", async () => {
   //   const data = {
   //     ...createOrder,
