@@ -16,6 +16,7 @@ class Controller {
         address,
         role,
         phoneNumber,
+        verified: false,
       });
 
       let createdOTP = otpGenerator.generate(10, {});
@@ -125,7 +126,7 @@ class Controller {
       next(err);
     }
   }
-  static async getUsers(req, res, next) {
+  static async getUsers(req,res,next){
     try {
       const users = await User.findAll({
         attributes: {
