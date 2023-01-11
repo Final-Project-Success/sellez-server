@@ -16,7 +16,6 @@ const p = new Payout(payoutSpecificOptions);
 class Controller {
   static async addOrders(req, res, next) {
     try {
-      console.log("test 1");
       const { totalPrice, shippingCost, products } = req.body;
       let p = JSON.parse(products);
       let mapping = p.map((el) => {
@@ -27,7 +26,7 @@ class Controller {
           url: el.imgUrl,
         };
       });
-      console.log("test 2");
+
       const result = await sequelize.transaction(async (t) => {
         let idPayout = "invoice-sellez-id-" + new Date().getTime().toString(); //
         let invoice = await i.createInvoice({
@@ -45,9 +44,7 @@ class Controller {
             },
           ],
         });
-        console.log(idPayout, "testttttt");
-        console.log(result, "diatas test 3");
-        console.log("test 3");
+
         const newOrder = await Order.create(
           {
             totalPrice,
@@ -58,7 +55,7 @@ class Controller {
           },
           { transaction: t }
         );
-        console.log("test 4");
+
         const data = await p.map((el) => {
           Product.decrement("stock", {
             by: el.cartQuantity,
@@ -75,15 +72,13 @@ class Controller {
             updatedAt: new Date(),
           };
         });
-        console.log("test 5");
+
         let c = await OrderProduct.bulkCreate(data, { transaction: t });
 
         res.status(200).json({ invoice_url: invoice.invoice_url });
         return newOrder;
       });
     } catch (err) {
-      console.log(err, "dari orders");
-
       next(err);
     }
   }
@@ -122,77 +117,52 @@ class Controller {
       next(err);
     }
   }
-  static async checkOutOrder(req, res, next) {
-    try {
-      const { id } = req.params;
-      const { totalPrice, shippingCost } = req.body;
-      const order = await Order.findByPk(id);
 
-      if (!order) {
-        throw {
-          name: "Order Not Found",
-        };
-      }
-
-      let idPayout = "invoice-sellez-id-" + new Date().getTime().toString(); //
-      let invoice = await i.createInvoice({
-        externalID: idPayout,
-        payerEmail: order.User.email,
-        description: `Invoice for ${idPayout}`,
-        amount: totalPrice,
-        items: [
-          {
-            name: "Air Conditioner",
-            quantity: 1,
-            price: 100000,
-            category: "Electronic",
-            url: "https://yourcompany.com/example_item",
-          },
-        ],
-        fees: [
-          {
-            type: "Handling Fee",
-            value: shippingCost,
-          },
-        ],
-      });
-
-      await Order.update(
-        {
-          totalPrice,
-          shippingCost,
-          invoice: invoice.id,
-        },
-        { where: { id, status: false } }
-      );
-
-      await redis.del("sellez-orders");
-      console.log(invoice);
-      res.status(200).json({ msg: "Success to order", invoice: invoice });
-    } catch (err) {
-      next(err);
-    }
-  }
   static async updateStatusOrder(req, res, next) {
     try {
-      const order = await Order.findOne({ where: { invoice: req.body.id } });
-      console.log(order, "disiniiiii");
-      if (!order) {
-        throw {
-          name: "Order Not Found",
-        };
+      let x = req.headers["x-callback-token"];
+      let { status, paid_amount, id } = req.body;
+      if (x !== "MAK8CELq5HOfMOAGkNi9Ys5VzPhzqmz2dklDwzalG16AOMFk") {
+        res.status(401).json({ message: "You are not authorized" });
       }
+      if (status === "PAID") {
+        let data = await Order.findOne({ where: { invoice: id } });
+        if (!data) {
+          res.status(404).json({ message: "Data not found" });
+        }
 
-      await Order.update({ status: true }, { where: { invoice: req.body.id } });
-      await redis.del("sellez-orders");
+        if (data.totalPrice !== paid_amount) {
+          res.status().json({ message: "Paid amount not same with amount" });
+        }
 
-      console.log("Order paid");
+        let updatedPayment = await Order.update(
+          { status: "PAID" },
+          { where: { invoice: id } }
+        );
 
-      res.status(200).json({
-        msg: "Order already paid",
-      });
+        res.status(200).json({ message: "Update to PAID Success" });
+      } else if (status === "EXPIRED") {
+        let data = await Order.findOne({ where: { invoice: id } });
+        let orderProd = await OrderProduct.findAll({
+          where: { OrderId: data.id },
+        });
+        orderProd.forEach((el) => {
+          Product.increment("stock", {
+            by: el.dataValues.quantity,
+            where: { id: el.ProductId },
+          });
+        });
+        if (!data) {
+          res.status(404).json({ message: "Data not found" });
+        }
+        let updatedPayment = await Order.update(
+          { status: "EXPIRED" },
+          { where: { invoice: id } }
+        );
+        res.status(200).json({ message: "Update to Expired Success" });
+      }
     } catch (err) {
-      console.log(err, "dari order");
+      console.log(err);
       next(err);
     }
   }
