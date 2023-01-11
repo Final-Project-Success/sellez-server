@@ -24,6 +24,14 @@ beforeAll(async () => {
         role: "customer",
         phoneNumber: "081312391839",
       },
+      {
+        username: "user2",
+        email: "user2@gmail.com",
+        password: hashPassword("qwerty"),
+        address: "Hacktiv8",
+        role: "admin",
+        phoneNumber: "081312391839",
+      },
     ],
     {}
   );
@@ -90,6 +98,22 @@ describe("test table Orders", () => {
       expect(el).toHaveProperty("updatedAt", expect.any(String));
     });
   });
+  test("testing read Orders from admin if success", async () => {
+    let access_token = jwtSign({ id: 2 });
+    const response = await request(app)
+      .get("/orders/admin")
+      .set("access_token", access_token);
+    expect(response.status).toBe(200);
+    expect(response.body).toBeInstanceOf(Object);
+    response.body.forEach((el) => {
+      expect(el).toHaveProperty("UserId", expect.any(Number));
+      expect(el).toHaveProperty("status", expect.any(String));
+      expect(el).toHaveProperty("shippingCost", expect.any(Number));
+      expect(el).toHaveProperty("totalPrice", expect.any(Number));
+      expect(el).toHaveProperty("createdAt", expect.any(String));
+      expect(el).toHaveProperty("updatedAt", expect.any(String));
+    });
+  });
   test("testing table read Orders if error", async () => {
     jest
       .spyOn(Order, "findAll")
@@ -98,6 +122,19 @@ describe("test table Orders", () => {
       );
     const response = await request(app)
       .get("/orders")
+      .set("access_token", access_token);
+    expect(response.status).toBe(500);
+  });
+  test("testing table read Orders from admin if error", async () => {
+    let access_token = jwtSign({ id: 2 });
+
+    jest
+      .spyOn(Order, "findAll")
+      .mockImplementationOnce(() =>
+        Promise.reject({ name: "something wrong" })
+      );
+    const response = await request(app)
+      .get("/orders/admin")
       .set("access_token", access_token);
     expect(response.status).toBe(500);
   });
@@ -227,18 +264,6 @@ describe("test table Orders", () => {
       "Update to Expired Success"
     );
   });
-  // test.only("testing update status order if Expired but doesn't have data", async () => {
-  //   const response = await request(app)
-  //     .post("/orders/paid")
-  //     .set("x-callback-token", process.env.XENDIT_X)
-  //     .send({ status: "EXPIRED", id: "not found", paid_amount: 50000 });
-  //   expect(response.status).toBe(404);
-  //   expect(response.body).toHaveProperty(
-  //     "message",
-  //     "Update to Expired Success"
-  //   );
-  // });
-
   test("testing raja ongkir destination if success", async () => {
     const destination = {
       rajaongkir: {
