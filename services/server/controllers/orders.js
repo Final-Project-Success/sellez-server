@@ -73,8 +73,7 @@ class Controller {
           });
 
           let c = await OrderProduct.bulkCreate(data, { transaction: t });
-          await redis.del("sellez-orderProducts");
-          await redis.del("sellez-orders");
+
           res.status(200).json({ invoice_url: invoice.invoice_url });
           return newOrder;
         } catch (error) {
@@ -123,7 +122,6 @@ class Controller {
   static async updateStatusOrder(req, res, next) {
     try {
       let x = req.headers["x-callback-token"];
-      console.log("masuk sini");
       let { status, paid_amount, id } = req.body;
       if (x !== "MAK8CELq5HOfMOAGkNi9Ys5VzPhzqmz2dklDwzalG16AOMFk") {
         res.status(401).json({ message: "You are not authorized" });
@@ -146,22 +144,6 @@ class Controller {
         console.log("HOREEE BERHASIL TERBAYAR");
         res.status(200).json({ message: "Update Success" });
       }
-      // const order = await Order.findOne({ where: { invoice: req.body.id } });
-      // console.log(order, "disiniiiii");
-      // if (!order) {
-      //   throw {
-      //     name: "Order Not Found",
-      //   };
-      // }
-
-      // await Order.update({ status: true }, { where: { invoice: req.body.id } });
-      // await redis.del("sellez-orders");
-
-      // console.log("Order paid");
-
-      // res.status(200).json({
-      //   msg: "Order already paid",
-      // });
     } catch (err) {
       console.log(err);
       next(err);
