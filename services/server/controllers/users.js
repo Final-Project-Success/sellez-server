@@ -16,6 +16,7 @@ class Controller {
         address,
         role,
         phoneNumber,
+        verified: false,
       });
 
       let createdOTP = otpGenerator.generate(10, {});
@@ -141,7 +142,9 @@ class Controller {
     try {
       let { otp } = req.body;
       if (!otp) {
-        res.status(401).json({ message: "Please fill your activation code" });
+        return res
+          .status(401)
+          .json({ message: "Please fill your activation code" });
       }
       let findedUser = await Otp.findOne({ where: { UserId: req.User.id } });
       if (otp !== findedUser.otp) {
@@ -154,7 +157,6 @@ class Controller {
         res.status(200).json({ message: "Your Account Has Been Verified" });
       }
     } catch (error) {
-      console.log(error);
       next(error);
     }
   }

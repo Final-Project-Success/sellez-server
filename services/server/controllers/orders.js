@@ -1,4 +1,4 @@
-const { Order, OrderProduct, Product, sequelize } = require("../models");
+const { Order, OrderProduct, Product, User, sequelize } = require("../models");
 
 const redis = require("../config/connectRedis");
 const axios = require("axios");
@@ -111,7 +111,7 @@ class Controller {
     try {
       const { id } = req.params;
       const order = await Order.findByPk(id, { include: User });
-
+      console.log(order, "dari order");
       if (!order) {
         throw {
           name: "Order Not Found",
@@ -126,7 +126,7 @@ class Controller {
   static async updateStatusOrder(req, res, next) {
     try {
       const order = await Order.findOne({ where: { invoice: req.body.id } });
-
+      console.log(order, "disiniiiii");
       if (!order) {
         throw {
           name: "Order Not Found",
@@ -147,15 +147,17 @@ class Controller {
   }
   static async destination(req, res, next) {
     try {
-      const { data } = await axios({
-        method: `GET`,
-        url: `https://api.rajaongkir.com/starter/city`,
-        headers: {
-          key: process.env.RAJA_ONGKIR,
-        },
-      });
+      const { data } = await axios.get(
+        `https://api.rajaongkir.com/starter/city`,
+        {
+          headers: {
+            key: process.env.RAJA_ONGKIR,
+          },
+        }
+      );
       res.status(200).json(data);
     } catch (error) {
+      console.log(error, "dari siniii");
       next(error);
     }
   }
@@ -163,20 +165,21 @@ class Controller {
     try {
       // console.log("object");
       const { origin, destination, weight, courier } = req.body;
-      const { data } = await axios({
-        method: `POST`,
-        url: `https://api.rajaongkir.com/starter/cost`,
-        headers: {
-          key: process.env.RAJA_ONGKIR,
-        },
-        data: {
-          origin,
-          destination,
-          weight,
-          courier,
-        },
-      });
-
+      const request = {
+        origin,
+        destination,
+        weight,
+        courier,
+      };
+      const { data } = await axios.post(
+        `https://api.rajaongkir.com/starter/cost`,
+        request,
+        {
+          headers: {
+            key: process.env.RAJA_ONGKIR,
+          },
+        }
+      );
       // let response = {
       //   originType: data.rajaongkir.origin_details.type,
       //   originName: data.rajaongkir.origin_details.city_name,
@@ -189,9 +192,8 @@ class Controller {
       //   // price: data.rajaongkir.results[0].costs[0].cost[0].value,
       // };
 
-      res.status(200).json(data.rajaongkir);
+      res.status(200).json(data);
     } catch (error) {
-      res.status(500).json(error);
       next(error);
     }
   }
