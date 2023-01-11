@@ -1,4 +1,4 @@
-const { Order, OrderProduct, Product, User, sequelize } = require("../models");
+const { Order, OrderProduct, Product, sequelize } = require("../models");
 
 const redis = require("../config/connectRedis");
 const axios = require("axios");
@@ -26,7 +26,6 @@ class Controller {
           url: el.imgUrl,
         };
       });
-
       const result = await sequelize.transaction(async (t) => {
         let idPayout = "invoice-sellez-id-" + new Date().getTime().toString(); //
         let invoice = await i.createInvoice({
@@ -44,7 +43,6 @@ class Controller {
             },
           ],
         });
-
         const newOrder = await Order.create(
           {
             totalPrice,
@@ -55,7 +53,6 @@ class Controller {
           },
           { transaction: t }
         );
-
         const data = await p.map((el) => {
           Product.decrement("stock", {
             by: el.cartQuantity,
@@ -72,7 +69,6 @@ class Controller {
             updatedAt: new Date(),
           };
         });
-
         let c = await OrderProduct.bulkCreate(data, { transaction: t });
 
         return invoice;
@@ -98,9 +94,8 @@ class Controller {
     try {
       const { id } = req.params;
       const order = await Order.findByPk(id, {
-        include: [{ model: User, attributes: { exclude: ["password"] } }],
+        include: [{ model: OrderProduct, include: [Product] }],
       });
-      console.log(order, "dari order");
       if (!order) {
         throw {
           name: "Order Not Found",
@@ -115,19 +110,20 @@ class Controller {
   static async updateStatusOrder(req, res, next) {
     try {
       let x = req.headers["x-callback-token"];
-      console.log(req.body);
       let { status, paid_amount, id } = req.body;
-      if (x !== "MAK8CELq5HOfMOAGkNi9Ys5VzPhzqmz2dklDwzalG16AOMFk") {
-        res.status(401).json({ message: "You are not authorized" });
+      if (x !== process.env.XENDIT_X) {
+        return res.status(401).json({ message: "You are not authorized" });
       }
       if (status === "PAID") {
         let data = await Order.findOne({ where: { invoice: id } });
         if (!data) {
-          res.status(404).json({ message: "Data not found" });
+          return res.status(404).json({ message: "Data not found" });
         }
 
         if (data.totalPrice !== paid_amount) {
-          res.status().json({ message: "Paid amount not same with amount" });
+          return res
+            .status(400)
+            .json({ message: "Paid amount not same with amount" });
         }
 
         let updatedPayment = await Order.update(
@@ -135,37 +131,28 @@ class Controller {
           { where: { invoice: id } }
         );
 
-        console.log("HOREEE BERHASIL TERBAYAR");
-        res.status(200).json({ message: "Update to PAID Success" });
+        return res.status(200).json({ message: "Update to PAID Success" });
       } else if (status === "EXPIRED") {
-        console.log(
-          req.body,
-          "????????????????????????????????????????????????"
-        );
         let data = await Order.findOne({ where: { invoice: id } });
-        console.log(data, "inidata");
         let orderProd = await OrderProduct.findAll({
           where: { OrderId: data.id },
         });
         orderProd.forEach((el) => {
-          console.log(el.dataValues, "datavalues");
           Product.increment("stock", {
             by: el.dataValues.quantity,
-            where: { id: el.OrderId },
+            where: { id: el.ProductId },
           });
         });
         if (!data) {
-          res.status(404).json({ message: "Data not found" });
+          return res.status(404).json({ message: "Data not found" });
         }
         let updatedPayment = await Order.update(
           { status: "EXPIRED" },
           { where: { invoice: id } }
         );
-        console.log("HOREE GAGAL, INVOICENYA EXPIRED");
-        res.status(200).json({ message: "Update to Expired Success" });
+        return res.status(200).json({ message: "Update to Expired Success" });
       }
     } catch (err) {
-      console.log(err);
       next(err);
     }
   }
@@ -181,7 +168,6 @@ class Controller {
       );
       res.status(200).json(data);
     } catch (error) {
-      console.log(error, "dari siniii");
       next(error);
     }
   }
