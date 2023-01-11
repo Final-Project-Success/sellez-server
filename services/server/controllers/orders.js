@@ -57,7 +57,7 @@ class Controller {
 
           const data = await p.map((el) => {
             Product.decrement("stock", {
-              by: el.quantity,
+              by: el.cartQuantity,
               where: { id: el.id },
               transaction: t,
             });
