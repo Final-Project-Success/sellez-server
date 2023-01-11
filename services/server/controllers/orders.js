@@ -61,7 +61,6 @@ class Controller {
               where: { id: el.id },
               transaction: t,
             });
-            let totalzzz = el.price * el.quantity;
             return {
               ProductId: el.id,
               OrderId: newOrder.id,
@@ -74,14 +73,12 @@ class Controller {
           });
 
           let c = await OrderProduct.bulkCreate(data, { transaction: t });
-          await t.commit();
           await redis.del("sellez-orderProducts");
           await redis.del("sellez-orders");
           res.status(200).json({ invoice_url: invoice.invoice_url });
           return newOrder;
         } catch (error) {
           console.log(error);
-          await t.rollback();
         }
       });
     } catch (err) {
