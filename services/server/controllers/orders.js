@@ -26,65 +26,75 @@ class Controller {
           url: el.imgUrl,
         };
       });
-
+      console.log("masuk sini 1");
       const result = await sequelize.transaction(async (t) => {
-        try {
-          let idPayout = "invoice-sellez-id-" + new Date().getTime().toString(); //
-          let invoice = await i.createInvoice({
-            externalID: idPayout,
-            payerEmail: req.User.email,
-            description: `Invoice for ${idPayout}`,
-            amount: totalPrice,
-            items: mapping,
-            fees: [
-              {
-                type: "Handling Fee",
-                value: shippingCost,
-              },
-            ],
-          });
-
-          const newOrder = await Order.create(
+        let idPayout = "invoice-sellez-id-" + new Date().getTime().toString(); //
+        console.log({
+          externalID: idPayout,
+          payerEmail: req.User.email,
+          description: `Invoice for ${idPayout}`,
+          amount: totalPrice,
+          items: mapping,
+          fees: [
             {
-              totalPrice,
-              UserId: req.User.id,
-              shippingCost: shippingCost,
-              status: false,
-              invoice: invoice.id,
+              type: "Handling Fee",
+              value: shippingCost,
             },
-            { transaction: t }
-          );
+          ],
+        });
+        let invoice = await i.createInvoice({
+          externalID: idPayout,
+          payerEmail: req.User.email,
+          description: `Invoice for ${idPayout}`,
+          amount: totalPrice,
+          items: mapping,
+          fees: [
+            {
+              type: "Handling Fee",
+              value: shippingCost,
+            },
+          ],
+        });
+        console.log("masuk ini 2");
+        const newOrder = await Order.create(
+          {
+            totalPrice,
+            UserId: req.User.id,
+            shippingCost: shippingCost,
+            status: false,
+            invoice: invoice.id,
+          },
+          { transaction: t }
+        );
+        console.log("masuk ini 3");
 
-          const data = await p.map((el) => {
-            Product.decrement("stock", {
-              by: el.quantity,
-              where: { id: el.id },
-              transaction: t,
-            });
-            let totalzzz = el.price * el.quantity;
-            return {
-              ProductId: el.id,
-              OrderId: newOrder.id,
-              quantity: el.cartQuantity,
-              subTotal: el.price * el.cartQuantity,
-              price: el.price,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            };
+        const data = await p.map((el) => {
+          Product.decrement("stock", {
+            by: el.quantity,
+            where: { id: el.id },
+            transaction: t,
           });
+          let totalzzz = el.price * el.quantity;
+          return {
+            ProductId: el.id,
+            OrderId: newOrder.id,
+            quantity: el.cartQuantity,
+            subTotal: el.price * el.cartQuantity,
+            price: el.price,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          };
+        });
+        console.log("masuk ini 4");
 
-          let c = await OrderProduct.bulkCreate(data, { transaction: t });
-          await t.commit();
-          await redis.del("sellez-orderProducts");
-          await redis.del("sellez-orders");
-          res.status(200).json({ invoice_url: invoice.invoice_url });
-          return newOrder;
-        } catch (error) {
-          console.log(error);
-          await t.rollback();
-        }
+        let c = await OrderProduct.bulkCreate(data, { transaction: t });
+        await redis.del("sellez-orderProducts");
+        await redis.del("sellez-orders");
+        res.status(201).json({ invoice_url: invoice.invoice_url });
+        return newOrder;
       });
     } catch (err) {
+      console.log(err);
       next(err);
     }
   }
