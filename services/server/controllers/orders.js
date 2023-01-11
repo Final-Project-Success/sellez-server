@@ -142,7 +142,7 @@ class Controller {
           { where: { invoice: id } }
         );
 
-        console.log("HOREEE BERHASIL TERBAYAR hoho");
+        console.log("HOREEE BERHASIL TERBAYAR");
         res.status(200).json({ message: "Update to PAID Success" });
       } else if (status === "EXPIRED") {
         let data = await Order.findOne({ where: { invoice: id } });
