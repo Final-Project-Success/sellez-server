@@ -73,8 +73,12 @@ class Controller {
 
         return invoice;
       });
+<<<<<<< HEAD
 
       res.status(200).json({ invoice_url: result.invoice_url });
+=======
+      res.status(201).json({ invoice_url: result.invoice_url });
+>>>>>>> a13a635b81494323582b1f64d184c010e342d2dd
     } catch (err) {
       next(err);
     }
@@ -90,6 +94,24 @@ class Controller {
       next(err);
     }
   }
+
+   static async readAllOrdersAdmin(req, res, next) {
+    try {
+      // const chaceData = await redis.get("sellez-orders");
+      // if (chaceData) {
+      //   return res.status(200).json(JSON.parse(chaceData));
+      // }
+   
+      const orders = await Order.findAll();
+
+      // await redis.set("sellez-orders", JSON.stringify(orders));
+
+      res.status(200).json(orders);
+    } catch (err) {
+      next(err);
+    }
+  }
+
   static async readOneOrder(req, res, next) {
     try {
       const { id } = req.params;
