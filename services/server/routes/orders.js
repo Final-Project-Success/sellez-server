@@ -7,7 +7,7 @@ router
   .get("/", Controller.readAllOrders)
   .get("/city", Controller.destination)
   .get("/cost", Controller.cost)
-  .get("/:id", Controller.readOneOrder)
-  .post("/paid", Controller.updateStatusOrder);
+  .post("/paid", Controller.updateStatusOrder)
+  .get("/:id", Controller.readOneOrder);
 
 module.exports = router;
