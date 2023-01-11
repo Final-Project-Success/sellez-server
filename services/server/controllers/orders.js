@@ -28,77 +28,66 @@ class Controller {
       });
 
       const result = await sequelize.transaction(async (t) => {
-        try {
-          let idPayout = "invoice-sellez-id-" + new Date().getTime().toString(); //
-          let invoice = await i.createInvoice({
-            externalID: idPayout,
-            payerEmail: req.User.email,
-            description: `Invoice for ${idPayout}`,
-            amount: totalPrice,
-            items: mapping,
-            success_redirect_url: "https://www.google.com",
-            failure_redirect_url: "https://www.google.com",
-            fees: [
-              {
-                type: "Handling Fee",
-                value: shippingCost,
-              },
-            ],
-          });
-          console.log(invoice);
-
-          const newOrder = await Order.create(
+        let idPayout = "invoice-sellez-id-" + new Date().getTime().toString(); //
+        let invoice = await i.createInvoice({
+          externalID: idPayout,
+          payerEmail: req.User.email,
+          description: `Invoice for ${idPayout}`,
+          amount: totalPrice,
+          items: mapping,
+          success_redirect_url: "https://www.google.com",
+          failure_redirect_url: "https://www.google.com",
+          fees: [
             {
-              totalPrice,
-              UserId: req.User.id,
-              shippingCost: shippingCost,
-              status: false,
-              invoice: invoice.id,
+              type: "Handling Fee",
+              value: shippingCost,
             },
-            { transaction: t }
-          );
+          ],
+        });
 
-          const data = await p.map((el) => {
-            Product.decrement("stock", {
-              by: el.cartQuantity,
-              where: { id: el.id },
-              transaction: t,
-            });
-            return {
-              ProductId: el.id,
-              OrderId: newOrder.id,
-              quantity: el.cartQuantity,
-              subTotal: el.price * el.cartQuantity,
-              price: el.price,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            };
+        const newOrder = await Order.create(
+          {
+            totalPrice,
+            UserId: req.User.id,
+            shippingCost: shippingCost,
+            status: false,
+            invoice: invoice.id,
+          },
+          { transaction: t }
+        );
+
+        const data = await p.map((el) => {
+          Product.decrement("stock", {
+            by: el.cartQuantity,
+            where: { id: el.id },
+            transaction: t,
           });
+          return {
+            ProductId: el.id,
+            OrderId: newOrder.id,
+            quantity: el.cartQuantity,
+            subTotal: el.price * el.cartQuantity,
+            price: el.price,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          };
+        });
 
-          let c = await OrderProduct.bulkCreate(data, { transaction: t });
+        let c = await OrderProduct.bulkCreate(data, { transaction: t });
 
-          res.status(200).json({ invoice_url: invoice.invoice_url });
-          return newOrder;
-        } catch (error) {
-          console.log(error);
-        }
+        return invoice;
       });
+
+      res.status(200).json({ invoice_url: result.invoice_url });
     } catch (err) {
       next(err);
     }
   }
   static async readAllOrders(req, res, next) {
     try {
-      // const chaceData = await redis.get("sellez-orders");
-      // if (chaceData) {
-      //   return res.status(200).json(JSON.parse(chaceData));
-      // }
-      console.log(req.User, "???");
       const orders = await Order.findAll({
         where: { UserId: req.User.id },
       });
-
-      // await redis.set("sellez-orders", JSON.stringify(orders));
 
       res.status(200).json(orders);
     } catch (err) {
@@ -109,14 +98,8 @@ class Controller {
     try {
       const { id } = req.params;
       const order = await Order.findByPk(id, {
-<<<<<<< HEAD
-        include: [{ model: User, attributes: { exclude: ["password"] } }],
-      });
-      console.log(order, "dari order");
-=======
         include: [{ model: OrderProduct, include: [{ model: Product }] }],
       });
->>>>>>> ebf514ec17ec0abe0e84b18f1c64a995f49350cd
       if (!order) {
         throw {
           name: "Order Not Found",
@@ -188,7 +171,6 @@ class Controller {
   }
   static async cost(req, res, next) {
     try {
-      // console.log("object");
       const { origin, destination, weight, courier } = req.body;
       const request = {
         origin,
@@ -205,17 +187,6 @@ class Controller {
           },
         }
       );
-      // let response = {
-      //   originType: data.rajaongkir.origin_details.type,
-      //   originName: data.rajaongkir.origin_details.city_name,
-      //   destinationType: data.rajaongkir.destination_details.type,
-      //   destinationName: data.rajaongkir.destination_details.city_name,
-      //   courier: data.rajaongkir.results[0].name,
-      //   services: data.rajaongkir.results[0].costs.map((cost) => {
-      //     return cost;
-      //   }),
-      //   // price: data.rajaongkir.results[0].costs[0].cost[0].value,
-      // };
 
       res.status(200).json(data);
     } catch (error) {
