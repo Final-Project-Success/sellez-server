@@ -28,60 +28,55 @@ class Controller {
       });
 
       const result = await sequelize.transaction(async (t) => {
-        try {
-          let idPayout = "invoice-sellez-id-" + new Date().getTime().toString(); //
-          let invoice = await i.createInvoice({
-            externalID: idPayout,
-            payerEmail: req.User.email,
-            description: `Invoice for ${idPayout}`,
-            amount: totalPrice,
-            items: mapping,
-            success_redirect_url: "https://www.google.com",
-            failure_redirect_url: "https://www.google.com",
-            fees: [
-              {
-                type: "Handling Fee",
-                value: shippingCost,
-              },
-            ],
-          });
-          console.log(invoice);
-
-          const newOrder = await Order.create(
+        let idPayout = "invoice-sellez-id-" + new Date().getTime().toString(); //
+        let invoice = await i.createInvoice({
+          externalID: idPayout,
+          payerEmail: req.User.email,
+          description: `Invoice for ${idPayout}`,
+          amount: totalPrice,
+          items: mapping,
+          success_redirect_url: "https://www.google.com",
+          failure_redirect_url: "https://www.google.com",
+          fees: [
             {
-              totalPrice,
-              UserId: req.User.id,
-              shippingCost: shippingCost,
-              status: false,
-              invoice: invoice.id,
+              type: "Handling Fee",
+              value: shippingCost,
             },
-            { transaction: t }
-          );
+          ],
+        });
 
-          const data = await p.map((el) => {
-            Product.decrement("stock", {
-              by: el.cartQuantity,
-              where: { id: el.id },
-              transaction: t,
-            });
-            return {
-              ProductId: el.id,
-              OrderId: newOrder.id,
-              quantity: el.cartQuantity,
-              subTotal: el.price * el.cartQuantity,
-              price: el.price,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            };
+        const newOrder = await Order.create(
+          {
+            totalPrice,
+            UserId: req.User.id,
+            shippingCost: shippingCost,
+            status: false,
+            invoice: invoice.id,
+          },
+          { transaction: t }
+        );
+
+        const data = await p.map((el) => {
+          Product.decrement("stock", {
+            by: el.cartQuantity,
+            where: { id: el.id },
+            transaction: t,
           });
+          return {
+            ProductId: el.id,
+            OrderId: newOrder.id,
+            quantity: el.cartQuantity,
+            subTotal: el.price * el.cartQuantity,
+            price: el.price,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          };
+        });
 
-          let c = await OrderProduct.bulkCreate(data, { transaction: t });
+        let c = await OrderProduct.bulkCreate(data, { transaction: t });
 
-          res.status(200).json({ invoice_url: invoice.invoice_url });
-          return newOrder;
-        } catch (error) {
-          console.log(error);
-        }
+        res.status(200).json({ invoice_url: invoice.invoice_url });
+        return newOrder;
       });
     } catch (err) {
       next(err);
@@ -109,14 +104,9 @@ class Controller {
     try {
       const { id } = req.params;
       const order = await Order.findByPk(id, {
-<<<<<<< HEAD
         include: [{ model: User, attributes: { exclude: ["password"] } }],
       });
       console.log(order, "dari order");
-=======
-        include: [{ model: OrderProduct, include: [{ model: Product }] }],
-      });
->>>>>>> ebf514ec17ec0abe0e84b18f1c64a995f49350cd
       if (!order) {
         throw {
           name: "Order Not Found",
@@ -154,7 +144,22 @@ class Controller {
         console.log("HOREEE BERHASIL TERBAYAR");
         res.status(200).json({ message: "Update to PAID Success" });
       } else if (status === "EXPIRED") {
+        console.log(
+          req.body,
+          "????????????????????????????????????????????????"
+        );
         let data = await Order.findOne({ where: { invoice: id } });
+        console.log(data, "inidata");
+        let orderProd = await OrderProduct.findAll({
+          where: { OrderId: data.id },
+        });
+        orderProd.forEach((el) => {
+          console.log(el.dataValues, "datavalues");
+          Product.increment("stock", {
+            by: el.dataValues.quantity,
+            where: { id: el.OrderId },
+          });
+        });
         if (!data) {
           res.status(404).json({ message: "Data not found" });
         }

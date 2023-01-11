@@ -4,11 +4,11 @@ const router = require("express").Router();
 const { authentication } = require("../middlewares/authentication");
 
 router
-  .post("/paid", Controller.updateStatusOrder)
   .get("/", authentication, Controller.readAllOrders)
-  .post("/", Controller.addOrders)
-  .get("/city", Controller.destination)
-  .get("/cost", Controller.cost)
-  .get("/:id", Controller.readOneOrder);
+  .post("/", authentication, Controller.addOrders)
+  .post("/paid", Controller.updateStatusOrder)
+  .get("/city", authentication, Controller.destination)
+  .get("/cost", authentication, Controller.cost)
+  .get("/:id", authentication, Controller.readOneOrder);
 
 module.exports = router;
