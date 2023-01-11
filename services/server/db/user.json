@@ -1,0 +1,21 @@
+[
+    {
+      "username": "Admin",
+      "email": "admin@gmail.com",
+      "password": "admin123",
+      "address": "jakarta selatan",
+      "phoneNumber": "08765666362",
+      "role": "Admin",
+      "verified": true
+    },
+    {
+      "username": "Customer",
+      "email": "customer@gmail.com",
+      "password": "customer123",
+      "address": "jakarta selatan",
+      "phoneNumber": "087684899883",
+      "role": "customer",
+      "verified": true
+    }
+  ]
+  

@@ -126,7 +126,7 @@ class Controller {
       next(err);
     }
   }
-  static async getUsers(req, res, next) {
+  static async getUsers(req,res,next){
     try {
       const users = await User.findAll({
         attributes: {
