@@ -71,9 +71,9 @@ class Controller {
         });
         let c = await OrderProduct.bulkCreate(data, { transaction: t });
 
-        res.status(201).json({ invoice_url: invoice.invoice_url });
-        return newOrder;
+        return invoice;
       });
+      res.status(201).json({ invoice_url: result.invoice_url });
     } catch (err) {
       next(err);
     }
