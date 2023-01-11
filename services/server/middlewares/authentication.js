@@ -5,7 +5,6 @@ module.exports = {
   async authentication(req, res, next) {
     try {
       const { access_token } = req.headers;
-
       if (!access_token) {
         throw {
           name: "Unauthorized",

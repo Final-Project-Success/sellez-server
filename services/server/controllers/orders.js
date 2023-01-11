@@ -61,7 +61,6 @@ class Controller {
               where: { id: el.id },
               transaction: t,
             });
-            let totalzzz = el.price * el.quantity;
             return {
               ProductId: el.id,
               OrderId: newOrder.id,
@@ -74,14 +73,11 @@ class Controller {
           });
 
           let c = await OrderProduct.bulkCreate(data, { transaction: t });
-          await t.commit();
-          await redis.del("sellez-orderProducts");
-          await redis.del("sellez-orders");
+
           res.status(200).json({ invoice_url: invoice.invoice_url });
           return newOrder;
         } catch (error) {
           console.log(error);
-          await t.rollback();
         }
       });
     } catch (err) {
@@ -125,23 +121,31 @@ class Controller {
 
   static async updateStatusOrder(req, res, next) {
     try {
-      const order = await Order.findOne({ where: { invoice: req.body.id } });
-      console.log(order, "disiniiiii");
-      if (!order) {
-        throw {
-          name: "Order Not Found",
-        };
+      let x = req.headers["x-callback-token"];
+      let { status, paid_amount, id } = req.body;
+      if (x !== "MAK8CELq5HOfMOAGkNi9Ys5VzPhzqmz2dklDwzalG16AOMFk") {
+        res.status(401).json({ message: "You are not authorized" });
       }
+      if (status === "PAID") {
+        let data = await Order.findOne({ where: { invoice: id } });
+        if (!data) {
+          res.status(404).json({ message: "Data not found" });
+        }
 
-      await Order.update({ status: true }, { where: { invoice: req.body.id } });
-      await redis.del("sellez-orders");
+        if (data.totalPrice !== paid_amount) {
+          res.status().json({ message: "Paid amount not same with amount" });
+        }
 
-      console.log("Order paid");
+        let updatedPayment = await Order.update(
+          { status: true },
+          { where: { invoice: id } }
+        );
 
-      res.status(200).json({
-        msg: "Order already paid",
-      });
+        console.log("HOREEE BERHASIL TERBAYAR");
+        res.status(200).json({ message: "Update Success" });
+      }
     } catch (err) {
+      console.log(err);
       next(err);
     }
   }
