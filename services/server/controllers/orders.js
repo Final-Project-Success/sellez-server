@@ -1,6 +1,5 @@
 const { Order, OrderProduct, Product, sequelize } = require("../models");
 
-const redis = require("../config/connectRedis");
 const axios = require("axios");
 const Xendit = require("xendit-node");
 const x = new Xendit({
@@ -74,7 +73,7 @@ class Controller {
         return invoice;
       });
 
-      res.status(200).json({ invoice_url: result.invoice_url });
+      res.status(201).json({ invoice_url: result.invoice_url });
     } catch (err) {
       next(err);
     }
@@ -93,14 +92,7 @@ class Controller {
 
   static async readAllOrdersAdmin(req, res, next) {
     try {
-      // const chaceData = await redis.get("sellez-orders");
-      // if (chaceData) {
-      //   return res.status(200).json(JSON.parse(chaceData));
-      // }
-
       const orders = await Order.findAll();
-
-      // await redis.set("sellez-orders", JSON.stringify(orders));
 
       res.status(200).json(orders);
     } catch (err) {
@@ -191,11 +183,11 @@ class Controller {
   }
   static async cost(req, res, next) {
     try {
-      const { origin, destination, weight, courier } = req.body;
+      const { destination, courier } = req.body;
       const request = {
-        origin,
+        origin: 151,
         destination,
-        weight,
+        weight: 2000,
         courier,
       };
       const { data } = await axios.post(
