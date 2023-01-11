@@ -104,7 +104,7 @@ class Controller {
     try {
       const { id } = req.params;
       const order = await Order.findByPk(id, {
-        include: [{ model: User, attributes: { exclude: ["password"] } }],
+        include: [{ model: OrderProduct }],
       });
       console.log(order, "dari order");
       if (!order) {
