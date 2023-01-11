@@ -11,10 +11,9 @@ jest.setTimeout(50000);
 
 let product = [];
 let access_token;
-let email;
 jest.mock("axios");
 beforeAll(async () => {
-  await queryInterface.bulkInsert(
+  queryInterface.bulkInsert(
     "Users",
     [
       {
@@ -182,7 +181,64 @@ describe("test table Orders", () => {
     expect(response.status).toBe(404);
     expect(response.body).toHaveProperty("msg", "Order Not Found");
   });
-  test.only("testing update status order", async () => {});
+  test("testing update status order if success", async () => {
+    const response = await request(app)
+      .post("/orders/paid")
+      .set("x-callback-token", process.env.XENDIT_X)
+      .send({ status: "PAID", id: "test", paid_amount: 50000 });
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty("message", "Update to PAID Success");
+  });
+  test("testing update status order if process.env error", async () => {
+    const response = await request(app)
+      .post("/orders/paid")
+      .set("x-callback-token", "ERORR")
+      .send({ status: "PAID", id: "test", paid_amount: 50000 });
+    expect(response.status).toBe(401);
+    expect(response.body).toHaveProperty("message", "You are not authorized");
+  });
+  test("testing update status order if data not found", async () => {
+    const response = await request(app)
+      .post("/orders/paid")
+      .set("x-callback-token", process.env.XENDIT_X)
+      .send({ status: "PAID", id: "asd", paid_amount: 50000 });
+    expect(response.status).toBe(404);
+    expect(response.body).toHaveProperty("message", "Data not found");
+  });
+  test("testing update status order if Paid amount not same with amount", async () => {
+    const response = await request(app)
+      .post("/orders/paid")
+      .set("x-callback-token", process.env.XENDIT_X)
+      .send({ status: "PAID", id: "test", paid_amount: 70000 });
+    expect(response.status).toBe(400);
+    expect(response.body).toHaveProperty(
+      "message",
+      "Paid amount not same with amount"
+    );
+  });
+  test("testing update status order if Update to Expired Success", async () => {
+    const response = await request(app)
+      .post("/orders/paid")
+      .set("x-callback-token", process.env.XENDIT_X)
+      .send({ status: "EXPIRED", id: "test", paid_amount: 50000 });
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty(
+      "message",
+      "Update to Expired Success"
+    );
+  });
+  // test.only("testing update status order if Expired but doesn't have data", async () => {
+  //   const response = await request(app)
+  //     .post("/orders/paid")
+  //     .set("x-callback-token", process.env.XENDIT_X)
+  //     .send({ status: "EXPIRED", id: "not found", paid_amount: 50000 });
+  //   expect(response.status).toBe(404);
+  //   expect(response.body).toHaveProperty(
+  //     "message",
+  //     "Update to Expired Success"
+  //   );
+  // });
+
   test("testing raja ongkir destination if success", async () => {
     const destination = {
       rajaongkir: {

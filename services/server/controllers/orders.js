@@ -75,7 +75,6 @@ class Controller {
         return newOrder;
       });
     } catch (err) {
-      console.log(err);
       next(err);
     }
   }
@@ -85,7 +84,6 @@ class Controller {
       // if (chaceData) {
       //   return res.status(200).json(JSON.parse(chaceData));
       // }
-      console.log(req.User, "???");
       const orders = await Order.findAll({
         where: { UserId: req.User.id },
       });
@@ -103,7 +101,6 @@ class Controller {
       const order = await Order.findByPk(id, {
         include: [{ model: User, attributes: { exclude: ["password"] } }],
       });
-      console.log(order, "dari order");
       if (!order) {
         throw {
           name: "Order Not Found",
@@ -120,16 +117,18 @@ class Controller {
       let x = req.headers["x-callback-token"];
       let { status, paid_amount, id } = req.body;
       if (x !== process.env.XENDIT_X) {
-        res.status(401).json({ message: "You are not authorized" });
+        return res.status(401).json({ message: "You are not authorized" });
       }
       if (status === "PAID") {
         let data = await Order.findOne({ where: { invoice: id } });
         if (!data) {
-          res.status(404).json({ message: "Data not found" });
+          return res.status(404).json({ message: "Data not found" });
         }
 
         if (data.totalPrice !== paid_amount) {
-          res.status().json({ message: "Paid amount not same with amount" });
+          return res
+            .status(400)
+            .json({ message: "Paid amount not same with amount" });
         }
 
         let updatedPayment = await Order.update(
@@ -137,7 +136,7 @@ class Controller {
           { where: { invoice: id } }
         );
 
-        res.status(200).json({ message: "Update to PAID Success" });
+        return res.status(200).json({ message: "Update to PAID Success" });
       } else if (status === "EXPIRED") {
         let data = await Order.findOne({ where: { invoice: id } });
         let orderProd = await OrderProduct.findAll({
@@ -150,16 +149,15 @@ class Controller {
           });
         });
         if (!data) {
-          res.status(404).json({ message: "Data not found" });
+          return res.status(404).json({ message: "Data not found" });
         }
         let updatedPayment = await Order.update(
           { status: "EXPIRED" },
           { where: { invoice: id } }
         );
-        res.status(200).json({ message: "Update to Expired Success" });
+        return res.status(200).json({ message: "Update to Expired Success" });
       }
     } catch (err) {
-      console.log(err);
       next(err);
     }
   }
@@ -180,7 +178,6 @@ class Controller {
   }
   static async cost(req, res, next) {
     try {
-      // console.log("object");
       const { origin, destination, weight, courier } = req.body;
       const request = {
         origin,
