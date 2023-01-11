@@ -391,7 +391,7 @@ describe("test table Orders", () => {
     };
     axios.post.mockResolvedValue({ data: cost });
     const response = await request(app)
-      .get("/orders/cost")
+      .post("/orders/cost")
       .set("access_token", access_token)
       .send({
         origin: 1,
@@ -476,7 +476,7 @@ describe("test table Orders", () => {
     };
     axios.post.mockRejectedValue({ data: cost });
     const response = await request(app)
-      .get("/orders/cost")
+      .post("/orders/cost")
       .set("access_token", access_token)
       .send({
         origin: 1,

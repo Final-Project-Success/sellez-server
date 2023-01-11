@@ -12,7 +12,7 @@ router
   .get("/admin", authenticationAdmin, Controller.readAllOrdersAdmin)
   .post("/paid", Controller.updateStatusOrder)
   .get("/city", authentication, Controller.destination)
-  .get("/cost", authentication, Controller.cost)
+  .post("/cost", authentication, Controller.cost)
   .get("/:id", authentication, Controller.readOneOrder);
 
 module.exports = router;
