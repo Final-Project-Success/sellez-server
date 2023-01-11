@@ -9,6 +9,7 @@ class Controller {
     try {
       const { username, email, password, address, role, phoneNumber } =
         req.body;
+      console.log(req.body);
       const newUser = await User.create({
         username,
         email,

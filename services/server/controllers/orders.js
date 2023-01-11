@@ -1,4 +1,4 @@
-const { Order, OrderProduct, Product, User, sequelize } = require("../models");
+const { Order, OrderProduct, Product, sequelize } = require("../models");
 
 const redis = require("../config/connectRedis");
 const axios = require("axios");
@@ -73,22 +73,21 @@ class Controller {
 
         return invoice;
       });
+<<<<<<< HEAD
+
+      res.status(200).json({ invoice_url: result.invoice_url });
+=======
       res.status(201).json({ invoice_url: result.invoice_url });
+>>>>>>> a13a635b81494323582b1f64d184c010e342d2dd
     } catch (err) {
       next(err);
     }
   }
   static async readAllOrders(req, res, next) {
     try {
-      // const chaceData = await redis.get("sellez-orders");
-      // if (chaceData) {
-      //   return res.status(200).json(JSON.parse(chaceData));
-      // }
       const orders = await Order.findAll({
         where: { UserId: req.User.id },
       });
-
-      // await redis.set("sellez-orders", JSON.stringify(orders));
 
       res.status(200).json(orders);
     } catch (err) {
@@ -212,17 +211,6 @@ class Controller {
           },
         }
       );
-      // let response = {
-      //   originType: data.rajaongkir.origin_details.type,
-      //   originName: data.rajaongkir.origin_details.city_name,
-      //   destinationType: data.rajaongkir.destination_details.type,
-      //   destinationName: data.rajaongkir.destination_details.city_name,
-      //   courier: data.rajaongkir.results[0].name,
-      //   services: data.rajaongkir.results[0].costs.map((cost) => {
-      //     return cost;
-      //   }),
-      //   // price: data.rajaongkir.results[0].costs[0].cost[0].value,
-      // };
 
       res.status(200).json(data);
     } catch (error) {
