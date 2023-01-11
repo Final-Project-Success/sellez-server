@@ -1,13 +1,14 @@
 const Controller = require("../controllers/orders");
 
 const router = require("express").Router();
+const { authentication } = require("../middlewares/authentication");
 
 router
-  .post("/", Controller.addOrders)
-  .get("/", Controller.readAllOrders)
-  .get("/city", Controller.destination)
-  .get("/cost", Controller.cost)
+  .post("/", authentication, Controller.addOrders)
+  .get("/", authentication, Controller.readAllOrders)
+  .get("/city", authentication, Controller.destination)
+  .get("/cost", authentication, Controller.cost)
   .post("/paid", Controller.updateStatusOrder)
-  .get("/:id", Controller.readOneOrder);
+  .get("/:id", authentication, Controller.readOneOrder);
 
 module.exports = router;
