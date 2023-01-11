@@ -57,7 +57,7 @@ class Controller {
 
           const data = await p.map((el) => {
             Product.decrement("stock", {
-              by: el.quantity,
+              by: el.cartQuantity,
               where: { id: el.id },
               transaction: t,
             });
@@ -122,57 +122,7 @@ class Controller {
       next(err);
     }
   }
-  static async checkOutOrder(req, res, next) {
-    try {
-      const { id } = req.params;
-      const { totalPrice, shippingCost } = req.body;
-      const order = await Order.findByPk(id);
 
-      if (!order) {
-        throw {
-          name: "Order Not Found",
-        };
-      }
-
-      let idPayout = "invoice-sellez-id-" + new Date().getTime().toString(); //
-      let invoice = await i.createInvoice({
-        externalID: idPayout,
-        payerEmail: order.User.email,
-        description: `Invoice for ${idPayout}`,
-        amount: totalPrice,
-        items: [
-          {
-            name: "Air Conditioner",
-            quantity: 1,
-            price: 100000,
-            category: "Electronic",
-            url: "https://yourcompany.com/example_item",
-          },
-        ],
-        fees: [
-          {
-            type: "Handling Fee",
-            value: shippingCost,
-          },
-        ],
-      });
-
-      await Order.update(
-        {
-          totalPrice,
-          shippingCost,
-          invoice: invoice.id,
-        },
-        { where: { id, status: false } }
-      );
-
-      await redis.del("sellez-orders");
-      console.log(invoice);
-      res.status(200).json({ msg: "Success to order", invoice: invoice });
-    } catch (err) {
-      next(err);
-    }
-  }
   static async updateStatusOrder(req, res, next) {
     try {
       const order = await Order.findOne({ where: { invoice: req.body.id } });
