@@ -4,6 +4,7 @@ const { sequelize, Category } = require("../models");
 const { hashPassword } = require("../helpers/bcrypt");
 const { jwtSign } = require("../helpers/jwt");
 const { queryInterface } = sequelize;
+const redis = require("../config/connectRedis");
 
 beforeAll(() => {
   queryInterface.bulkInsert(
@@ -14,8 +15,6 @@ beforeAll(() => {
         email: "user1111@gmail.com",
         password: hashPassword("qwerty"),
         address: "Hacktiv8",
-        profilePict:
-          "https://www.smartfren.com/app/uploads/2021/11/featured-image-37.png",
         role: "customer",
         phoneNumber: "081312391839",
       },
@@ -36,6 +35,10 @@ beforeAll(() => {
     {}
   );
 });
+beforeEach(() => {
+  jest.restoreAllMocks();
+  redis.del("sellez-categories");
+});
 
 const createCategories = {
   name: "Men Shoes",
@@ -50,17 +53,24 @@ describe("test table Categories", () => {
       expect(el).toHaveProperty("name", expect.any(String));
     });
   });
-  // test("testing table read Categories if error", async () => {
-  //   jest
-  //     .spyOn(Category, "findAll")
-  //     .mockImplementationOnce(() =>
-  //       Promise.reject({ name: "something wrong" })
-  //     );
-  //   const response = await request(app).get("/categories");
-  //   expect(response.status).toBe(500);
-  // });
+  test("testing table read Categories if error", async () => {
+    jest
+      .spyOn(Category, "findAll")
+      .mockRejectedValue(() => Promise.reject({ name: "something wrong" }));
+    const response = await request(app).get("/categories");
+    expect(response.status).toBe(500);
+  });
+  test("testing using chace", async () => {
+    jest
+      .spyOn(redis, "get")
+      .mockImplementationOnce(() => Promise.resolve(JSON.stringify([])));
+    const response = await request(app).get("/categories");
+    // console.log(response.status);
+    expect(response.status).toBe(200);
+    expect(response.body).toBeInstanceOf(Object);
+  });
   test("testing read Categories by Id", async () => {
-    const response = await request(app).get("/categories/1");
+    const response = await request(app).get("/categories/2");
     expect(response.status).toBe(200);
     expect(response.body).toBeInstanceOf(Object);
     expect(response.body).toHaveProperty("name", expect.any(String));
@@ -104,6 +114,7 @@ describe("test table Categories", () => {
       "Category with name Men Shoes has been deleted"
     );
   });
+
   test("testing delete Categories if data by id not found", async () => {
     const response = await request(app)
       .delete("/categories/1000")

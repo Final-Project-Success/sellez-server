@@ -28,5 +28,4 @@ router
   .get("/user", Controller.getUsers)
   .get("/verification", authentication, Controller.verificationEmail);
 
-
 module.exports = router;
