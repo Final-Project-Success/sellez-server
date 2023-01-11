@@ -73,7 +73,7 @@ class Controller {
         return invoice;
       });
 
-      res.status(200).json({ invoice_url: result.invoice_url });
+      res.status(201).json({ invoice_url: result.invoice_url });
     } catch (err) {
       next(err);
     }
