@@ -121,7 +121,6 @@ class Controller {
   static async updateStatusOrder(req, res, next) {
     try {
       let x = req.headers["x-callback-token"];
-      console.log(req.body);
       let { status, paid_amount, id } = req.body;
       if (x !== "MAK8CELq5HOfMOAGkNi9Ys5VzPhzqmz2dklDwzalG16AOMFk") {
         res.status(401).json({ message: "You are not authorized" });
@@ -141,23 +140,16 @@ class Controller {
           { where: { invoice: id } }
         );
 
-        console.log("HOREEE BERHASIL TERBAYAR");
         res.status(200).json({ message: "Update to PAID Success" });
       } else if (status === "EXPIRED") {
-        console.log(
-          req.body,
-          "????????????????????????????????????????????????"
-        );
         let data = await Order.findOne({ where: { invoice: id } });
-        console.log(data, "inidata");
         let orderProd = await OrderProduct.findAll({
           where: { OrderId: data.id },
         });
         orderProd.forEach((el) => {
-          console.log(el.dataValues, "datavalues");
           Product.increment("stock", {
             by: el.dataValues.quantity,
-            where: { id: el.OrderId },
+            where: { id: el.ProductId },
           });
         });
         if (!data) {
@@ -167,7 +159,6 @@ class Controller {
           { status: "EXPIRED" },
           { where: { invoice: id } }
         );
-        console.log("HOREE GAGAL, INVOICENYA EXPIRED");
         res.status(200).json({ message: "Update to Expired Success" });
       }
     } catch (err) {
