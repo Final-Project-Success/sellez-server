@@ -5,8 +5,8 @@ const { authentication } = require("../middlewares/authentication");
 
 router
   .get("/", Controller.readAllOrders)
-  .get("/admin", Controller.readAllOrdersAdmin)
   .post("/", authentication, Controller.addOrders)
+  .get("/admin", Controller.readAllOrdersAdmin)
   .post("/paid", Controller.updateStatusOrder)
   .get("/city", authentication, Controller.destination)
   .get("/cost", authentication, Controller.cost)
