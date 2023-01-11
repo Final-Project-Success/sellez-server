@@ -15,7 +15,7 @@ module.exports = {
             "https://res.cloudinary.com/dqschoc1m/image/upload/v1673246003/JKT48/wyjml9nknykhrnh21l3r.png",
           stock: 200,
           CategoryId: 1,
-          color: "shadow-lg shadow-blue-500",
+          color: "from-blue-600 to-blue-500 shadow-lg shadow-blue-500",
         },
         {
           name: "Air Jordan 4 Retro PS 'Military Black'",
@@ -26,7 +26,7 @@ module.exports = {
             "https://res.cloudinary.com/dqschoc1m/image/upload/v1673248156/JKT48/ugimwwimrzdqou3mbkyn.png",
           stock: 88,
           CategoryId: 1,
-          color: "shadow-lg shadow-rose-500",
+          color: "from-red-500 to-rose-500 shadow-lg shadow-rose-500",
         },
         {
           name: "Wmns Air Jordan 1 Low SE 'Homage'",
@@ -37,7 +37,7 @@ module.exports = {
             "https://res.cloudinary.com/dqschoc1m/image/upload/v1673263399/JKT48/kvuviz4ewh1d0zjegrwd.png",
           stock: 45,
           CategoryId: 1,
-          color: "shadow-lg shadow-violet-500",
+          color: "from-violet-500 to-indigo-500 shadow-lg shadow-violet-500",
         },
         {
           name: "Dunk Low SB 'Sandy Bodecker'",
@@ -48,7 +48,7 @@ module.exports = {
             "https://res.cloudinary.com/dqschoc1m/image/upload/v1673259723/JKT48/lsvw0yq6g8gy7vq98gpc.png",
           stock: 169,
           CategoryId: 1,
-          color: "shadow-lg shadow-blue-500",
+          color: "from-sky-600 to-indigo-600 shadow-lg shadow-blue-500",
         },
         {
           name: "Dunk Low Pro SB 'Bart Simpson'",
@@ -59,7 +59,7 @@ module.exports = {
             "https://res.cloudinary.com/dqschoc1m/image/upload/v1673250307/JKT48/fac8euaaw8mufbqctfly.png",
           stock: 76,
           CategoryId: 1,
-          color: "shadow-lg shadow-green-500",
+          color: "from-green-500 to-emerald-500 shadow-lg shadow-green-500",
         },
         {
           name: "Salehe Bembury x 990v2 Made in USA 'Sand Be The Time'",
@@ -70,7 +70,7 @@ module.exports = {
             "https://res.cloudinary.com/dqschoc1m/image/upload/v1673253263/JKT48/ps51g5nhggzfqmzhmetf.png",
           stock: 13,
           CategoryId: 1,
-          color: "shadow-lg shadow-rose-500",
+          color: "from-red-500 to-rose-500 shadow-lg shadow-rose-500",
         },
         {
           name: "Teddy Santis x 990v3 Made in USA 'White Blue'",
@@ -81,7 +81,7 @@ module.exports = {
             "https://res.cloudinary.com/dqschoc1m/image/upload/v1673256936/JKT48/qghjpe2be6jb4cx4grxp.png",
           stock: 24,
           CategoryId: 1,
-          color: "shadow-lg shadow-orange-500",
+          color: "from-orange-500 to-amber-500 shadow-lg shadow-orange-500",
         },
         {
           name: "Yeezy Boost 350 V2 'Beluga Reflective'",
@@ -92,7 +92,7 @@ module.exports = {
             "https://res.cloudinary.com/dqschoc1m/image/upload/v1673257547/JKT48/x0spec1i67ajlv19kvkc.png",
           stock: 211,
           CategoryId: 1,
-          color: "shadow-lg shadow-yellow-500",
+          color: "from-gray-900 to-yellow-500 shadow-lg shadow-yellow-500",
         },
         {
           name: "Travis Scott x Air Jordan 1 Low OG 'Reverse Mocha'c",
@@ -103,7 +103,7 @@ module.exports = {
             "https://res.cloudinary.com/dqschoc1m/image/upload/v1673258324/JKT48/zqlce61brsbxaxyafwye.png",
           stock: 16,
           CategoryId: 1,
-          color: "shadow-lg shadow-blue-500",
+          color: "from-blue-600 to-blue-500 shadow-lg shadow-blue-500",
         },
         {
           name: "Yeezy Boost 350 V2 'Flax'",
@@ -114,7 +114,7 @@ module.exports = {
             "https://res.cloudinary.com/dqschoc1m/image/upload/v1673259207/JKT48/qgywzjg3l8ki0lwapbfs.png",
           stock: 242,
           CategoryId: 1,
-          color: "shadow-lg shadow-rose-500",
+          color: "from-red-500 to-rose-500 shadow-lg shadow-rose-500",
         },
       ],
       {}

@@ -1,6 +1,5 @@
-const { Order, OrderProduct, Product, User, sequelize } = require("../models");
+const { Order, OrderProduct, Product, sequelize } = require("../models");
 
-const redis = require("../config/connectRedis");
 const axios = require("axios");
 const Xendit = require("xendit-node");
 const x = new Xendit({
@@ -26,88 +25,86 @@ class Controller {
           url: el.imgUrl,
         };
       });
-
       const result = await sequelize.transaction(async (t) => {
-        try {
-          let idPayout = "invoice-sellez-id-" + new Date().getTime().toString(); //
-          let invoice = await i.createInvoice({
-            externalID: idPayout,
-            payerEmail: req.User.email,
-            description: `Invoice for ${idPayout}`,
-            amount: totalPrice,
-            items: mapping,
-            fees: [
-              {
-                type: "Handling Fee",
-                value: shippingCost,
-              },
-            ],
-          });
-
-          const newOrder = await Order.create(
+        let idPayout = "invoice-sellez-id-" + new Date().getTime().toString(); //
+        let invoice = await i.createInvoice({
+          externalID: idPayout,
+          payerEmail: req.User.email,
+          description: `Invoice for ${idPayout}`,
+          amount: totalPrice,
+          items: mapping,
+          successRedirectURL: "https://www.google.com",
+          failureRedirectURL: "https://www.google.com",
+          fees: [
             {
-              totalPrice,
-              UserId: req.User.id,
-              shippingCost: shippingCost,
-              status: false,
-              invoice: invoice.id,
+              type: "Handling Fee",
+              value: shippingCost,
             },
-            { transaction: t }
-          );
-
-          const data = await p.map((el) => {
-            Product.decrement("stock", {
-              by: el.cartQuantity,
-              where: { id: el.id },
-              transaction: t,
-            });
-            return {
-              ProductId: el.id,
-              OrderId: newOrder.id,
-              quantity: el.cartQuantity,
-              subTotal: el.price * el.cartQuantity,
-              price: el.price,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            };
+          ],
+        });
+        const newOrder = await Order.create(
+          {
+            totalPrice,
+            UserId: req.User.id,
+            shippingCost: shippingCost,
+            status: false,
+            invoice: invoice.id,
+          },
+          { transaction: t }
+        );
+        const data = await p.map((el) => {
+          Product.decrement("stock", {
+            by: el.cartQuantity,
+            where: { id: el.id },
+            transaction: t,
           });
+          return {
+            ProductId: el.id,
+            OrderId: newOrder.id,
+            quantity: el.cartQuantity,
+            subTotal: el.price * el.cartQuantity,
+            price: el.price,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          };
+        });
+        let c = await OrderProduct.bulkCreate(data, { transaction: t });
 
-          let c = await OrderProduct.bulkCreate(data, { transaction: t });
-
-          res.status(200).json({ invoice_url: invoice.invoice_url });
-          return newOrder;
-        } catch (error) {
-          console.log(error);
-        }
+        return invoice;
       });
+
+      res.status(201).json({ invoice_url: result.invoice_url });
     } catch (err) {
       next(err);
     }
   }
   static async readAllOrders(req, res, next) {
     try {
-      const chaceData = await redis.get("sellez-orders");
-
-      if (chaceData) {
-        return res.status(200).json(JSON.parse(chaceData));
-      }
-
       const orders = await Order.findAll({
-        include: [{ model: User }, { model: OrderProduct }],
+        where: { UserId: req.User.id },
       });
-
-      await redis.set("sellez-orders", JSON.stringify(orders));
 
       res.status(200).json(orders);
     } catch (err) {
       next(err);
     }
   }
+
+  static async readAllOrdersAdmin(req, res, next) {
+    try {
+      const orders = await Order.findAll();
+
+      res.status(200).json(orders);
+    } catch (err) {
+      next(err);
+    }
+  }
+
   static async readOneOrder(req, res, next) {
     try {
       const { id } = req.params;
       const order = await Order.findByPk(id, {
-        include: [{ model: OrderProduct, include: [{ model: Product }] }],
+        include: [{ model: OrderProduct, include: [Product] }],
       });
       if (!order) {
         throw {
@@ -123,19 +120,20 @@ class Controller {
   static async updateStatusOrder(req, res, next) {
     try {
       let x = req.headers["x-callback-token"];
-      console.log(req.body);
       let { status, paid_amount, id } = req.body;
-      if (x !== "MAK8CELq5HOfMOAGkNi9Ys5VzPhzqmz2dklDwzalG16AOMFk") {
-        res.status(401).json({ message: "You are not authorized" });
+      if (x !== process.env.XENDIT_X) {
+        return res.status(401).json({ message: "You are not authorized" });
       }
       if (status === "PAID") {
         let data = await Order.findOne({ where: { invoice: id } });
         if (!data) {
-          res.status(404).json({ message: "Data not found" });
+          return res.status(404).json({ message: "Data not found" });
         }
 
         if (data.totalPrice !== paid_amount) {
-          res.status().json({ message: "Paid amount not same with amount" });
+          return res
+            .status(400)
+            .json({ message: "Paid amount not same with amount" });
         }
 
         let updatedPayment = await Order.update(
@@ -143,22 +141,28 @@ class Controller {
           { where: { invoice: id } }
         );
 
-        console.log("HOREEE BERHASIL TERBAYAR");
-        res.status(200).json({ message: "Update to PAID Success" });
+        return res.status(200).json({ message: "Update to PAID Success" });
       } else if (status === "EXPIRED") {
         let data = await Order.findOne({ where: { invoice: id } });
+        let orderProd = await OrderProduct.findAll({
+          where: { OrderId: data.id },
+        });
+        orderProd.forEach((el) => {
+          Product.increment("stock", {
+            by: el.dataValues.quantity,
+            where: { id: el.ProductId },
+          });
+        });
         if (!data) {
-          res.status(404).json({ message: "Data not found" });
+          return res.status(404).json({ message: "Data not found" });
         }
         let updatedPayment = await Order.update(
           { status: "EXPIRED" },
           { where: { invoice: id } }
         );
-        console.log("HOREE GAGAL, INVOICENYA EXPIRED");
-        res.status(200).json({ message: "Update to Expired Success" });
+        return res.status(200).json({ message: "Update to Expired Success" });
       }
     } catch (err) {
-      console.log(err);
       next(err);
     }
   }
@@ -174,18 +178,16 @@ class Controller {
       );
       res.status(200).json(data);
     } catch (error) {
-      console.log(error, "dari siniii");
       next(error);
     }
   }
   static async cost(req, res, next) {
     try {
-      // console.log("object");
-      const { origin, destination, weight, courier } = req.body;
+      const { destination, courier } = req.body;
       const request = {
-        origin,
+        origin: 151,
         destination,
-        weight,
+        weight: 2000,
         courier,
       };
       const { data } = await axios.post(
@@ -197,17 +199,6 @@ class Controller {
           },
         }
       );
-      // let response = {
-      //   originType: data.rajaongkir.origin_details.type,
-      //   originName: data.rajaongkir.origin_details.city_name,
-      //   destinationType: data.rajaongkir.destination_details.type,
-      //   destinationName: data.rajaongkir.destination_details.city_name,
-      //   courier: data.rajaongkir.results[0].name,
-      //   services: data.rajaongkir.results[0].costs.map((cost) => {
-      //     return cost;
-      //   }),
-      //   // price: data.rajaongkir.results[0].costs[0].cost[0].value,
-      // };
 
       res.status(200).json(data);
     } catch (error) {
