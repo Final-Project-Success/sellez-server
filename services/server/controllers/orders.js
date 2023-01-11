@@ -109,9 +109,14 @@ class Controller {
     try {
       const { id } = req.params;
       const order = await Order.findByPk(id, {
+<<<<<<< HEAD
         include: [{ model: User, attributes: { exclude: ["password"] } }],
       });
       console.log(order, "dari order");
+=======
+        include: [{ model: OrderProduct, include: [{ model: Product }] }],
+      });
+>>>>>>> ebf514ec17ec0abe0e84b18f1c64a995f49350cd
       if (!order) {
         throw {
           name: "Order Not Found",
