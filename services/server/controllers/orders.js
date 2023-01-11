@@ -99,7 +99,7 @@ class Controller {
     try {
       const { id } = req.params;
       const order = await Order.findByPk(id, {
-        include: [{ model: User, attributes: { exclude: ["password"] } }],
+        include: [{ model: OrderProduct, include: [Product] }],
       });
       if (!order) {
         throw {
