@@ -153,6 +153,7 @@ class Controller {
           { status: "EXPIRED" },
           { where: { invoice: id } }
         );
+        console.log("HOREE GAGAL, INVOICENYA EXPIRED");
         res.status(200).json({ message: "Update to Expired Success" });
       }
     } catch (err) {
