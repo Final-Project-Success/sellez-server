@@ -7,9 +7,8 @@ router
   .get("/", authentication, Controller.readAllOrders)
   .post("/", authentication, Controller.addOrders)
   .post("/paid", Controller.updateStatusOrder)
-  .use(authentication)
-  .get("/city", Controller.destination)
-  .get("/cost", Controller.cost)
-  .get("/:id", Controller.readOneOrder);
+  .get("/city", authentication, Controller.destination)
+  .get("/cost", authentication, Controller.cost)
+  .get("/:id", authentication, Controller.readOneOrder);
 
 module.exports = router;

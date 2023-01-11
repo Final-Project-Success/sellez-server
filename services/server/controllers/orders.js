@@ -98,8 +98,9 @@ class Controller {
     try {
       const { id } = req.params;
       const order = await Order.findByPk(id, {
-        include: [{ model: OrderProduct, include: [{ model: Product }] }],
+        include: [{ model: User, attributes: { exclude: ["password"] } }],
       });
+      console.log(order, "dari order");
       if (!order) {
         throw {
           name: "Order Not Found",
@@ -137,7 +138,22 @@ class Controller {
         console.log("HOREEE BERHASIL TERBAYAR");
         res.status(200).json({ message: "Update to PAID Success" });
       } else if (status === "EXPIRED") {
+        console.log(
+          req.body,
+          "????????????????????????????????????????????????"
+        );
         let data = await Order.findOne({ where: { invoice: id } });
+        console.log(data, "inidata");
+        let orderProd = await OrderProduct.findAll({
+          where: { OrderId: data.id },
+        });
+        orderProd.forEach((el) => {
+          console.log(el.dataValues, "datavalues");
+          Product.increment("stock", {
+            by: el.dataValues.quantity,
+            where: { id: el.OrderId },
+          });
+        });
         if (!data) {
           res.status(404).json({ message: "Data not found" });
         }
