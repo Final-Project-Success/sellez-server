@@ -1,6 +1,5 @@
 const { Order, OrderProduct, Product, sequelize } = require("../models");
 
-const redis = require("../config/connectRedis");
 const axios = require("axios");
 const Xendit = require("xendit-node");
 const x = new Xendit({
@@ -191,11 +190,11 @@ class Controller {
   }
   static async cost(req, res, next) {
     try {
-      const { origin, destination, weight, courier } = req.body;
+      const { destination, courier } = req.body;
       const request = {
-        origin,
+        origin: 151,
         destination,
-        weight,
+        weight: 2000,
         courier,
       };
       const { data } = await axios.post(
