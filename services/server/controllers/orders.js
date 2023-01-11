@@ -36,6 +36,8 @@ class Controller {
             description: `Invoice for ${idPayout}`,
             amount: totalPrice,
             items: mapping,
+            success_redirect_url: "https://www.google.com",
+            failure_redirect_url: "https://www.google.com",
             fees: [
               {
                 type: "Handling Fee",
@@ -43,6 +45,7 @@ class Controller {
               },
             ],
           });
+          console.log(invoice);
 
           const newOrder = await Order.create(
             {
@@ -86,17 +89,16 @@ class Controller {
   }
   static async readAllOrders(req, res, next) {
     try {
-      const chaceData = await redis.get("sellez-orders");
-
-      if (chaceData) {
-        return res.status(200).json(JSON.parse(chaceData));
-      }
-
+      // const chaceData = await redis.get("sellez-orders");
+      // if (chaceData) {
+      //   return res.status(200).json(JSON.parse(chaceData));
+      // }
+      console.log(req.User, "???");
       const orders = await Order.findAll({
-        include: [{ model: User }, { model: OrderProduct }],
+        where: { UserId: req.User.id },
       });
 
-      await redis.set("sellez-orders", JSON.stringify(orders));
+      // await redis.set("sellez-orders", JSON.stringify(orders));
 
       res.status(200).json(orders);
     } catch (err) {
@@ -106,7 +108,9 @@ class Controller {
   static async readOneOrder(req, res, next) {
     try {
       const { id } = req.params;
-      const order = await Order.findByPk(id, { include: User });
+      const order = await Order.findByPk(id, {
+        include: [{ model: User, attributes: { exclude: ["password"] } }],
+      });
       console.log(order, "dari order");
       if (!order) {
         throw {
