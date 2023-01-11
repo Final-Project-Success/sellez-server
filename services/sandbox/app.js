@@ -23,7 +23,6 @@ const io = new Server(server, {
   },
 });
 
-// var socketById = io.sockets.sockets.get(id);
 const main = async () => {
   await mongoose.connect(process.env.URI, {
     useNewUrlParser: true,
@@ -37,31 +36,34 @@ main();
 io.on("connection", async (socket) => {
   console.log(`User Connected: ${socket.id}`);
   let users = await User.findAll();
-  // console.log(users, `<<<< `);
   // ==== chat admin-cust =======
-  // socket.on("conversation", (payload) => {
-  //   console.log(payload, `<<++++++`);
-  //   users = users.filter(
-  //     (el) => el.id !== payload.id && el.role !== payload.role
-  //   );
-  //   socket.emit("listUser", users);
-  //   console.log(users, `users`);
-  // });
-  socket.on("join_room", (msg) => {
+  socket.on("conversation", (payload) => {
+    console.log(payload, `<<++++++`);
+    users = users.filter((el) => el.role !== payload.role);
+    socket.emit("listUser", users);
+    console.log(users, `users`);
+  });
+  socket.on("join_room", async (msg) => {
     socket.join(msg);
+    const getChat = await MessagePrivate.find({
+      room: msg,
+    });
+    console.log(getChat, `!!!!!!!!!!!!!!!!!!`);
     console.log(`User with ID: ${socket.id} joined room: ${msg}`);
   });
 
   socket.on("send_msgprivate", ({ room, user, time, message }) => {
-    console.log(room, user, time, message , `<<<<<< INI DATA`);
-    MessagePrivate.create({privatemsg: {
-      room,
-      message :{
-        user,
-        message,
-        time
-      }
-    }})
+    console.log(room, user, time, message, `<<<<<< INI DATA`);
+    MessagePrivate.create({
+      privatemsg: {
+        room,
+        message: {
+          user,
+          message,
+          time,
+        },
+      },
+    })
       .then((data) => {
         console.log(data);
       })
@@ -69,21 +71,11 @@ io.on("connection", async (socket) => {
         console.log(err, "error create messages");
       })
       .finally(() => {
-        socket.to(room).emit("receive_msgprivate",message);
+        socket
+          .to(room)
+          .emit("receive_msgprivate", { room, user, time, message });
       });
   });
-  // socket.on("send_msgprivate", ({ senderId, text, receiverId }) => {
-  //   MessagePrivate.create({senderId, text, receiverId})
-  //     .then((data) => {
-  //       console.log(data);
-  //     })
-  //     .catch((err) => {
-  //       console.log(err, "error create messages");
-  //     })
-  //     .finally(() => {
-  //       io.emit("receive_msgprivate", { senderId, text, receiverId });
-  //     });
-  // });
   // batas
   socket.on("send_message", (messages) => {
     // console.log(messages, "msg")
