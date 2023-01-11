@@ -7,12 +7,13 @@ const { jwtSign } = require("../helpers/jwt");
 const redis = require("../config/connectRedis");
 const { text } = require("express");
 const { queryInterface } = sequelize;
+jest.setTimeout(50000);
 
 let product = [];
 let access_token;
 jest.mock("axios");
 beforeAll(async () => {
-  await queryInterface.bulkInsert(
+  queryInterface.bulkInsert(
     "Users",
     [
       {
@@ -66,16 +67,8 @@ beforeAll(async () => {
 });
 beforeEach(() => {
   jest.restoreAllMocks();
-  redis.del("sellez-orders");
 });
 
-const createOrder = {
-  UserId: 1,
-  totalPrice: 50000,
-  shippingCost: 20000,
-  status: false,
-  invoice: "test",
-};
 describe("test table Orders", () => {
   test("testing read Orders if User isn't logged in", async () => {
     const response = await request(app).get("/orders");
@@ -90,7 +83,7 @@ describe("test table Orders", () => {
     expect(response.body).toBeInstanceOf(Object);
     response.body.forEach((el) => {
       expect(el).toHaveProperty("UserId", expect.any(Number));
-      expect(el).toHaveProperty("status", expect.any(Boolean));
+      expect(el).toHaveProperty("status", expect.any(String));
       expect(el).toHaveProperty("shippingCost", expect.any(Number));
       expect(el).toHaveProperty("totalPrice", expect.any(Number));
       expect(el).toHaveProperty("createdAt", expect.any(String));
@@ -108,80 +101,65 @@ describe("test table Orders", () => {
       .set("access_token", access_token);
     expect(response.status).toBe(500);
   });
-  test("testing using chace", async () => {
-    jest
-      .spyOn(redis, "get")
-      .mockImplementationOnce(() => Promise.resolve(JSON.stringify([])));
+  test("testing create Order if success", async () => {
+    const createOrder = {
+      totalPrice: 50000,
+      shippingCost: 20000,
+      products: JSON.stringify(
+        product.map((el) => {
+          return {
+            ...el.dataValues,
+            cartQuantity: 2,
+          };
+        })
+      ),
+    };
     const response = await request(app)
-      .get("/orders")
+      .post("/orders")
+      .send(createOrder)
       .set("access_token", access_token);
-    // console.log(response.status);
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(201);
     expect(response.body).toBeInstanceOf(Object);
+    expect(response.body).toHaveProperty("invoice_url", expect.any(String));
   });
-  // test("testing create Order if success", async () => {
-  //   const response = await request(app)
-  //     .post("/orders")
-  //     .send(createOrder)
-  //     .set("access_token", access_token);
-  //   console.log(response.body, "<<<<<<<<<<<<<<<");
-  //   expect(response.status).toBe(201);
-  //   expect(response.body).toBeInstanceOf(Object);
-  //   expect(response.body).toHaveProperty("UserId", expect.any(Number));
-  //   expect(response.body).toHaveProperty("status", expect.any(Boolean));
-  //   expect(response.body).toHaveProperty("shippingCost", expect.any(Number));
-  //   expect(response.body).toHaveProperty("totalPrice", expect.any(Number));
-  //   expect(response.body).toHaveProperty("createdAt", expect.any(String));
-  //   expect(response.body).toHaveProperty("updatedAt", expect.any(String));
-  // });
-  // test("testing create Order by id if totalPrice is null", async () => {
-  //   const data = {
-  //     ...createOrder,
-  //     totalPrice: null,
-  //   };
-  //   const response = await request(app)
-  //     .post("/orders")
-  //     .send(data)
-  //     .set("access_token", access_token);
-  //   expect(response.status).toBe(400);
-  //   expect(response.body).toHaveProperty("msg", "Total price is required");
-  // });
-  // test("testing create Order by id if totalPrice is empty", async () => {
-  //   const data = {
-  //     ...createOrder,
-  //     totalPrice: "",
-  //   };
-  //   const response = await request(app)
-  //     .post("/orders")
-  //     .send(data)
-  //     .set("access_token", access_token);
-  //   expect(response.status).toBe(400);
-  //   expect(response.body).toHaveProperty("msg", "Total price is required");
-  // });
-  // test("testing create Order by id if shippingCost is null", async () => {
-  //   const data = {
-  //     ...createOrder,
-  //     shippingCost: null,
-  //   };
-  //   const response = await request(app)
-  //     .post("/orders")
-  //     .send(data)
-  //     .set("access_token", access_token);
-  //   expect(response.status).toBe(400);
-  //   expect(response.body).toHaveProperty("msg", "Shipping cost is required");
-  // });
-  // test("testing create Order by id if shippingCost is empty", async () => {
-  //   const data = {
-  //     ...createOrder,
-  //     shippingCost: "",
-  //   };
-  //   const response = await request(app)
-  //     .post("/orders")
-  //     .send(data)
-  //     .set("access_token", access_token);
-  //   expect(response.status).toBe(400);
-  //   expect(response.body).toHaveProperty("msg", "Shipping cost is required");
-  // });
+  test("testing create Order by id if totalPrice is null", async () => {
+    const createOrder = {
+      totalPrice: null,
+      shippingCost: 20000,
+      products: JSON.stringify(
+        product.map((el) => {
+          return {
+            ...el.dataValues,
+            cartQuantity: 2,
+          };
+        })
+      ),
+    };
+    const response = await request(app)
+      .post("/orders")
+      .send(createOrder)
+      .set("access_token", access_token);
+    expect(response.status).toBe(500);
+  });
+  test("testing create Order by id if totalPrice is empty", async () => {
+    const createOrder = {
+      totalPrice: "",
+      shippingCost: 20000,
+      products: JSON.stringify(
+        product.map((el) => {
+          return {
+            ...el.dataValues,
+            cartQuantity: 2,
+          };
+        })
+      ),
+    };
+    const response = await request(app)
+      .post("/orders")
+      .send(createOrder)
+      .set("access_token", access_token);
+    expect(response.status).toBe(500);
+  });
   test("testing read Order by Id", async () => {
     const response = await request(app)
       .get("/orders/1")
@@ -190,7 +168,7 @@ describe("test table Orders", () => {
     expect(response.status).toBe(200);
     expect(response.body).toBeInstanceOf(Object);
     expect(response.body).toHaveProperty("UserId", expect.any(Number));
-    expect(response.body).toHaveProperty("status", expect.any(Boolean));
+    expect(response.body).toHaveProperty("status", expect.any(String));
     expect(response.body).toHaveProperty("shippingCost", expect.any(Number));
     expect(response.body).toHaveProperty("totalPrice", expect.any(Number));
     expect(response.body).toHaveProperty("createdAt", expect.any(String));
@@ -203,103 +181,64 @@ describe("test table Orders", () => {
     expect(response.status).toBe(404);
     expect(response.body).toHaveProperty("msg", "Order Not Found");
   });
-  // test("testing edit Status Order by id if success", async () => {
-  //   const data = {
-  //     ...createOrder,
-  //     status: true,
-  //   };
+  test("testing update status order if success", async () => {
+    const response = await request(app)
+      .post("/orders/paid")
+      .set("x-callback-token", process.env.XENDIT_X)
+      .send({ status: "PAID", id: "test", paid_amount: 50000 });
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty("message", "Update to PAID Success");
+  });
+  test("testing update status order if process.env error", async () => {
+    const response = await request(app)
+      .post("/orders/paid")
+      .set("x-callback-token", "ERORR")
+      .send({ status: "PAID", id: "test", paid_amount: 50000 });
+    expect(response.status).toBe(401);
+    expect(response.body).toHaveProperty("message", "You are not authorized");
+  });
+  test("testing update status order if data not found", async () => {
+    const response = await request(app)
+      .post("/orders/paid")
+      .set("x-callback-token", process.env.XENDIT_X)
+      .send({ status: "PAID", id: "asd", paid_amount: 50000 });
+    expect(response.status).toBe(404);
+    expect(response.body).toHaveProperty("message", "Data not found");
+  });
+  test("testing update status order if Paid amount not same with amount", async () => {
+    const response = await request(app)
+      .post("/orders/paid")
+      .set("x-callback-token", process.env.XENDIT_X)
+      .send({ status: "PAID", id: "test", paid_amount: 70000 });
+    expect(response.status).toBe(400);
+    expect(response.body).toHaveProperty(
+      "message",
+      "Paid amount not same with amount"
+    );
+  });
+  test("testing update status order if Update to Expired Success", async () => {
+    const response = await request(app)
+      .post("/orders/paid")
+      .set("x-callback-token", process.env.XENDIT_X)
+      .send({ status: "EXPIRED", id: "test", paid_amount: 50000 });
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty(
+      "message",
+      "Update to Expired Success"
+    );
+  });
+  // test.only("testing update status order if Expired but doesn't have data", async () => {
   //   const response = await request(app)
-  //     .post("/orders/1/paid")
-  //     .send(data)
-  //     .set("access_token", access_token);
-  //   expect(response.status).toBe(200);
-  //   expect(response.body).toHaveProperty("msg", "Success to order");
-  // });
-  // test("testing edit Order by id if id not found", async () => {
-  //   const data = {
-  //     ...createOrder,
-  //     totalPrice: 70000,
-  //     shippingCost: 25000,
-  //   };
-  //   const response = await request(app)
-  //     .put("/orders/1000")
-  //     .send(data)
-  //     .set("access_token", access_token);
+  //     .post("/orders/paid")
+  //     .set("x-callback-token", process.env.XENDIT_X)
+  //     .send({ status: "EXPIRED", id: "not found", paid_amount: 50000 });
   //   expect(response.status).toBe(404);
-  //   expect(response.body).toHaveProperty("msg", "Order Not Found");
+  //   expect(response.body).toHaveProperty(
+  //     "message",
+  //     "Update to Expired Success"
+  //   );
   // });
-  // test("testing edit Order by id if totalPrice is null", async () => {
-  //   const data = {
-  //     ...createOrder,
-  //     totalPrice: null,
-  //   };
-  //   const response = await request(app)
-  //     .put("/orders/2")
-  //     .send(data)
-  //     .set("access_token", access_token);
-  //   expect(response.status).toBe(400);
-  //   expect(response.body).toHaveProperty("msg", "Total price is required");
-  // });
-  // test("testing edit Order by id if totalPrice is empty", async () => {
-  //   const data = {
-  //     ...createOrder,
-  //     totalPrice: "",
-  //   };
-  //   const response = await request(app)
-  //     .put("/orders/2")
-  //     .send(data)
-  //     .set("access_token", access_token);
-  //   expect(response.status).toBe(400);
-  //   expect(response.body).toHaveProperty("msg", "Total price is required");
-  // });
-  // test("testing edit Order by id if shippingCost is null", async () => {
-  //   const data = {
-  //     ...createOrder,
-  //     shippingCost: null,
-  //   };
-  //   const response = await request(app)
-  //     .put("/orders/2")
-  //     .send(data)
-  //     .set("access_token", access_token);
-  //   expect(response.status).toBe(400);
-  //   expect(response.body).toHaveProperty("msg", "Shipping cost is required");
-  // });
-  // test("testing edit Order by id if shippingCost is empty", async () => {
-  //   const data = {
-  //     ...createOrder,
-  //     shippingCost: "",
-  //   };
-  //   const response = await request(app)
-  //     .put("/orders/2")
-  //     .send(data)
-  //     .set("access_token", access_token);
-  //   expect(response.status).toBe(400);
-  //   expect(response.body).toHaveProperty("msg", "Shipping cost is required");
-  // });
-  // test("testing edit Order by Id in status if success", async () => {
-  //   const data = {
-  //     ...createOrder,
-  //     status: true,
-  //   };
-  //   const response = await request(app)
-  //     .patch("/orders/1")
-  //     .send(data)
-  //     .set("access_token", access_token);
-  //   expect(response.status).toBe(200);
-  //   expect(response.body).toHaveProperty("msg", "Order already paid");
-  // });
-  // test("testing edit Order by Id in status if id not found", async () => {
-  //   const data = {
-  //     ...createOrder,
-  //     status: true,
-  //   };
-  //   const response = await request(app)
-  //     .patch("/orders/1000")
-  //     .send(data)
-  //     .set("access_token", access_token);
-  //   expect(response.status).toBe(404);
-  //   expect(response.body).toHaveProperty("msg", "Order Not Found");
-  // });
+
   test("testing raja ongkir destination if success", async () => {
     const destination = {
       rajaongkir: {

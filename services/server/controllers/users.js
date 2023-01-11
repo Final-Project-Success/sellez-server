@@ -20,7 +20,6 @@ class Controller {
       });
 
       let createdOTP = otpGenerator.generate(10, {});
-      console.log(createdOTP);
 
       const registerOTP = await Otp.create({
         UserId: newUser.id,
@@ -65,7 +64,6 @@ class Controller {
   static async login(req, res, next) {
     try {
       const { email, password } = req.body;
-      console.log(req.body);
       if (!email || !password) {
         throw {
           name: "Error email or password",
@@ -126,7 +124,7 @@ class Controller {
       next(err);
     }
   }
-  static async getUsers(req,res,next){
+  static async getUsers(req, res, next) {
     try {
       const users = await User.findAll({
         attributes: {
