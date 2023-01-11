@@ -106,8 +106,9 @@ class Controller {
   static async readOneOrder(req, res, next) {
     try {
       const { id } = req.params;
-      const order = await Order.findByPk(id, { include: User });
-      console.log(order, "dari order");
+      const order = await Order.findByPk(id, {
+        include: [{ model: OrderProduct, include: [{ model: Product }] }],
+      });
       if (!order) {
         throw {
           name: "Order Not Found",
