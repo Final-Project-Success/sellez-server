@@ -104,7 +104,7 @@ class Controller {
     try {
       const { id } = req.params;
       const order = await Order.findByPk(id, {
-        include: [{ model: User, attributes: { exclude: ["password"] } }],
+        include: [{ model: OrderProduct, include: [Product] }],
       });
       console.log(order, "dari order");
       if (!order) {
@@ -122,7 +122,7 @@ class Controller {
     try {
       let x = req.headers["x-callback-token"];
       let { status, paid_amount, id } = req.body;
-      if (x !== "MAK8CELq5HOfMOAGkNi9Ys5VzPhzqmz2dklDwzalG16AOMFk") {
+      if (x !== process.env.XENDIT_X) {
         res.status(401).json({ message: "You are not authorized" });
       }
       if (status === "PAID") {
