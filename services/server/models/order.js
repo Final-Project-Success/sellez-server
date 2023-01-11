@@ -44,7 +44,7 @@ module.exports = (sequelize, DataTypes) => {
         },
       },
       status: {
-        type: DataTypes.BOOLEAN,
+        type: DataTypes.STRING,
         allowNull: false,
         validate: {
           notNull: {
@@ -76,5 +76,8 @@ module.exports = (sequelize, DataTypes) => {
       modelName: "Order",
     }
   );
+  Order.beforeCreate(async (order) => {
+    order.status = "PENDING";
+  });
   return Order;
 };
