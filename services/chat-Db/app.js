@@ -1,4 +1,5 @@
 require("dotenv").config();
+const axios = require("axios");
 const express = require("express");
 const app = express();
 const port = process.env.PORT || 10000;
@@ -6,7 +7,6 @@ const http = require("http");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const router = require("./routes");
-const { User } = require("../server/models");
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -35,13 +35,15 @@ main();
 
 io.on("connection", async (socket) => {
   console.log(`User Connected: ${socket.id}`);
-  let users = await User.findAll();
+  const { data: User } = await axios.get("http://localhost:4000/user");
+  // let users = await User.findAll();
   // ==== chat admin-cust =======
   socket.on("conversation", (payload) => {
-    // console.log(payload, `<<++++++`);
-    users = users.filter((el) => el.role !== payload.role);
+    console.log(payload, `<<++++++`);
+    console.log(User);
+    const users = User.filter((el) => el.role !== payload.role);
     socket.emit("listUser", users);
-    // console.log(users, `users`);
+    console.log(users, `users`);
   });
   socket.on("join_room", async (room) => {
     // console.log(room, `<<<room `);
