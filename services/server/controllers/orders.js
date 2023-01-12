@@ -33,8 +33,8 @@ class Controller {
           description: `Invoice for ${idPayout}`,
           amount: totalPrice,
           items: mapping,
-          successRedirectURL: "https://www.google.com",
-          failureRedirectURL: "https://www.google.com",
+          successRedirectURL: "https://sellez-web.web.app/orders",
+          failureRedirectURL: "https://sellez-web.web.app/orders",
           fees: [
             {
               type: "Handling Fee",
