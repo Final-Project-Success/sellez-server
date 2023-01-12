@@ -264,6 +264,13 @@ describe("test table Orders", () => {
       "Update to Expired Success"
     );
   });
+  test("testing update status order if error", async () => {
+    const response = await request(app)
+      .post("/orders/paid")
+      .set("x-callback-token", process.env.XENDIT_X)
+      .send({ status: "EXPIRED", id: "not-found", paid_amount: 70000 });
+    expect(response.status).toBe(500);
+  });
   test("testing raja ongkir destination if success", async () => {
     const destination = {
       rajaongkir: {

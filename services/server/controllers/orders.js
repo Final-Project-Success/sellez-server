@@ -168,6 +168,7 @@ class Controller {
   }
   static async destination(req, res, next) {
     try {
+      console.log("masuk");
       const { data } = await axios.get(
         `https://api.rajaongkir.com/starter/city`,
         {
@@ -176,6 +177,7 @@ class Controller {
           },
         }
       );
+      console.log(data.rajaongkir.results, "???");
       res.status(200).json(data);
     } catch (error) {
       next(error);
@@ -183,7 +185,9 @@ class Controller {
   }
   static async cost(req, res, next) {
     try {
+      console.log("MASUK SINI");
       const { destination, courier } = req.body;
+      console.log(req.body);
       const request = {
         origin: 151,
         destination,
@@ -200,8 +204,10 @@ class Controller {
         }
       );
 
+      console.log(data);
       res.status(200).json(data);
     } catch (error) {
+      console.log(error);
       next(error);
     }
   }

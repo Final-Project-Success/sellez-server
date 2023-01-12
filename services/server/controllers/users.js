@@ -83,11 +83,14 @@ class Controller {
 
       const access_token = jwtSign({ id: findUser.id });
 
+      console.log(findUser.verified);
+
       res.status(200).json({
         access_token,
         username: findUser.username,
         email: findUser.email,
         role: findUser.role,
+        verify: findUser.verified,
         msg: "Login Success!",
       });
     } catch (err) {
