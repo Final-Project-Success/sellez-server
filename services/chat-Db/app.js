@@ -7,10 +7,6 @@ const http = require("http");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const router = require("./routes");
-<<<<<<< HEAD
-=======
-// const { User } = require("../server/models");
->>>>>>> 89d152ff4c399c8141262421e7d1d700c5eac73e
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
