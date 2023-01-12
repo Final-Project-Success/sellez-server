@@ -12,6 +12,7 @@ class MessageController {
     try {
       const msg = await Message.find();
       res.json(msg);
+      console.log(msg);
     } catch (error) {
       res.status(500).json({ message: error.message });
     }

@@ -7,7 +7,6 @@ const http = require("http");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const router = require("./routes");
-// const { User } = require("../server/models");
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -37,11 +36,12 @@ main();
 io.on("connection", async (socket) => {
   console.log(`User Connected: ${socket.id}`);
   const { data: User } = await axios.get("http://44.203.56.35:4000/user");
-  let users = await User.findAll();
+  // let users = await User.findAll();
   // ==== chat admin-cust =======
   socket.on("conversation", (payload) => {
-    // console.log(payload, `<<++++++`);
-    users = users.filter((el) => el.role !== payload.role);
+    console.log(payload, `<<++++++`);
+    console.log(User);
+    const users = User.filter((el) => el.role !== payload.role);
     socket.emit("listUser", users);
     // console.log(users, `users`);
   });
