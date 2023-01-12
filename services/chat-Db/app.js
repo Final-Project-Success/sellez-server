@@ -1,12 +1,12 @@
 require("dotenv").config();
 const express = require("express");
+const axios = require("axios");
 const app = express();
 const port = process.env.PORT || 10000;
 const http = require("http");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const router = require("./routes");
-const { User } = require("../server/models");
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -34,6 +34,8 @@ const main = async () => {
 main();
 
 io.on("connection", async (socket) => {
+  const { data: User } = await axios.get("http://44.203.56.35:4000/user");
+  console.log(User), `<<<<<<< USER`;
   console.log(`User Connected: ${socket.id}`);
   let users = await User.findAll();
   // ==== chat admin-cust =======
